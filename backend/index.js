@@ -37,7 +37,6 @@ router.post("/sendTest", (req, res) => {
 });
 
 
-
 // append /api for our http requests
 app.use("/api", router);
 
