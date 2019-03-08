@@ -64,12 +64,11 @@ function runMonkeyTest(events, packageName, apkName) {
 }
 
 const downloadFile = (test) => {
-
   var params = {
     Bucket: 'pruebas-autom',
     Key: 'apks/' + test.apkName
   };
-  console.log('keyyyy', params.Key);
+
   shell.mkdir('apks');
   const filePath = "apks/" + test.apkName;
   s3.getObject(params, (err, data) => {
@@ -80,7 +79,6 @@ const downloadFile = (test) => {
       console.log(`${filePath} has been created!`)
       runMonkeyTest(test.events, test.packageName, test.apkName);
     }
-
   })
 }
 
