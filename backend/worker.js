@@ -6,7 +6,6 @@ var params = {
   QueueUrl: process.env.SQS_CYPRESS
 };
 
-
 var rcvMsg = function rcvMsg() {
   sqs.receiveMessage(params, function (err, data) {
     if (err) console.log(err, err.stack); 
