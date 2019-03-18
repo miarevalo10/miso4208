@@ -1,5 +1,3 @@
-#language: en
-
 @e2e
 Feature: Create a survey
 

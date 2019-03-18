@@ -1,24 +1,14 @@
 var appUrl = 'http://localhost:8888/index.php/admin/index';
-
-function login(user, password) {
-  cy.visit(appUrl)
-
-  cy.get('.login-content-form').find('input[name="user"]').click().type(user)
-  cy.get('.login-content-form').find('input[name="password"]').click().type(password)
-  cy.get('button[name="login_submit"]').click()
-}
-
-function loginAdministrador() {
-  login("admin", "admin")
-}
-
-function buscarEncuesta(encuesta) {
-  cy.get('.selector__list_surveys').click()
-  cy.get('input[id="Survey_searched_value"]').click().type(encuesta)
-  cy.get('#surveys').find('input[name="yt0"]').click()
-}
+var data_mock;
+const RANDOM_COUNT = 1000
+const SEP_RANDOM = ":"
+const RANDOM = "random" + SEP_RANDOM
 
 beforeEach(() => {
+  cy.fixture("mock_data").then((data) => {
+    data_mock = data
+  });
+
   Given(`I go to administration login`, () => {
     cy.visit(appUrl)
   })
@@ -30,7 +20,7 @@ beforeEach(() => {
 })
 
 When(`I fill {string} with {string}`, (id, value) => {
-  cy.get('input[id="' + id + '"]').click().type(value)
+  cy.get('input[id="' + id + '"]').click().type(getValue(value))
 })
 
 When(`I press button name {string}`, name => {
@@ -57,4 +47,34 @@ Then(`Search table shows {string}`, (register) => {
   cy.get('#surveys table').contains(register)
 })
 
+/**
+ * Returns value according
+ * @param {string} value 
+ */
+function getValue(value) {
+  if (value.startsWith(RANDOM)) {
+    let res = value.split(SEP_RANDOM);
+    let indice = Math.floor(Math.random() * 1000);    
+    return data_mock[indice][res[1]];
+  } else {
+    return value;
+  }
+}
 
+function login(user, password) {
+  cy.visit(appUrl)
+
+  cy.get('.login-content-form').find('input[name="user"]').click().type(user)
+  cy.get('.login-content-form').find('input[name="password"]').click().type(password)
+  cy.get('button[name="login_submit"]').click()
+}
+
+function loginAdministrador() {
+  login("admin", "admin")
+}
+
+function buscarEncuesta(encuesta) {
+  cy.get('.selector__list_surveys').click()
+  cy.get('input[id="Survey_searched_value"]').click().type(encuesta)
+  cy.get('#surveys').find('input[name="yt0"]').click()
+}
