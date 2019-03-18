@@ -47,10 +47,6 @@ Then(`Search table shows {string}`, (register) => {
   cy.get('#surveys table').contains(register)
 })
 
-/**
- * Returns value according
- * @param {string} value 
- */
 function getValue(value) {
   if (value.startsWith(RANDOM)) {
     let res = value.split(SEP_RANDOM);
