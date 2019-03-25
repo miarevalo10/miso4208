@@ -10,6 +10,7 @@ Feature: Create a refuel register
     Then I enter text "55" into field with id "edt_price"
     Then I press view with id "menu_save"
     When I swipe left
+    Then I wait to see "BDD Test"
     Then I press "BDD Test"
     Then I should see "12345km"
     Then I should see "35.00"

@@ -1,6 +1,5 @@
 Feature: Create an other expenditure register
 
-  @current
   Scenario: Create an other expenditure correctly
     When I press fab
     Then I should see "Other expenditure"

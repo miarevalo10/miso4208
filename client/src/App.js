@@ -4,7 +4,13 @@ import axios from "axios";
 
 class App extends Component {
 
-  sendMsg(msg){
+  sendMsg(){
+    var msg = {
+      "apkName": "me.kuehle.carreport_79.apk",
+      "events" : "1000",
+      "packageName" : "me.kuehle.carreport"
+    }
+    console.log('test', msg);
    
     axios.post("http://localhost:3001/api/sendTest", {
       message: msg
@@ -14,7 +20,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <button onClick={() => this.sendMsg('ubicacion test')}>Send Msg</button>
+        <button onClick={() => this.sendMsg()}>Send Msg</button>
       </div>
     );
   }

@@ -4,7 +4,7 @@ var shell = require('shelljs');
 
 AWS.config.update({ region: 'us-west-2' });
 var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
-var s3 = new AWS.S3()
+var s3 = new AWS.S3();
 
 
 var params = {
@@ -20,10 +20,10 @@ const rcvMsg = () => {
     if (err) console.log(err, err.stack);
     else {
       if (data.Messages) {
-        var test = JSON.parse(data.Messages[0].Body);
-        console.log('msg rcv', test);
+        var test = data.Messages[0].Body;
+        console.log('msg rcv', JSON.parse(test));
         receiptHandle = data.Messages[0].ReceiptHandle;
-        downloadFile(test);
+        downloadFile( JSON.parse(test));
 
       } else {
         console.log('no new msgs');
@@ -64,6 +64,7 @@ function runMonkeyTest(events, packageName, apkName) {
 }
 
 const downloadFile = (test) => {
+  console.log('test',test);
   var params = {
     Bucket: 'pruebas-autom',
     Key: 'apks/' + test.apkName

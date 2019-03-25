@@ -25,7 +25,7 @@ const downloadFeatures = (test) => {
     if (err) console.error(err)
     else {
       console.log('Starting features download');
-      fs.writeFile(filePath, data.Body.toString(), (err) => {
+      fs.writeFile(filePath, data.Body, (err) => {
         shell.exec('unzip calabash/features.zip');
         console.log(`${filePath} has been created!`)
       })

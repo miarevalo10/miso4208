@@ -1,4 +1,5 @@
 const express = require("express");
+const bodyParser = require("body-parser");
 
 const API_PORT = 3001;
 const app = express();
@@ -8,6 +9,13 @@ var AWS = require('aws-sdk');
 AWS.config.update({ region: 'us-west-2' });
 var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 
+
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+
+app.use(bodyParser.json());
+
 //CORS middleware
 var allowCrossDomain = function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -16,21 +24,29 @@ var allowCrossDomain = function (req, res, next) {
     next();
 }
 
-
 app.use(allowCrossDomain);
 
 router.post("/sendTest", (req, res) => {
     // La idea sería mandar estos params desde el front
+    console.log('sendtest', req.body.message);
+    var msg = {
+        "apkName": "me.kuehle.carreport_79.apk",
+        "events" : "1000",
+        "packageName" : "me.kuehle.carreport"
+      }
+    var msg = req.body.message;
     var params = {
         DelaySeconds: 0,
-        MessageBody: "Test to run",
-        QueueUrl: process.env.SQS_CYPRESS
+        MessageBody: JSON.stringify(msg) ,
+        QueueUrl: process.env.SQS_RANDOM_MONKEY
     };
 
     sqs.sendMessage(params, function (err, data) {
         if (err) {
+            console.log(err);
             res.json({ success: false, error: err }); ("Error", err);
         } else {
+            console.log('success');
             return res.json({ success: true });
         }
     });
