@@ -13,4 +13,4 @@ Scenario: Search a survey without results
     When I press button "panel-2"
     When I fill "Survey_searched_value" with "random:titulo"
     When I press input name "yt0"
-    Then Search table shows "Ninguna encuesta encontrada"
+    Then Search table shows "Encuesta no encontrada."
