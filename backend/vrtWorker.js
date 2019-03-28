@@ -2,8 +2,6 @@ var AWS = require('aws-sdk');
 const compareImages = require("resemblejs/compareImages");
 const fs = require("mz/fs")
 var shell = require('shelljs');
-const multer = require('multer');
-const multerS3 = require('multer-s3');
 
 var params = {
     QueueUrl: process.env.SQS_VRT
@@ -91,33 +89,32 @@ function uploadImage(file) {
     });
 }
 
-    // Downloads features zip and saves it to calabash folder
-    async function downloadImages(fileNames) {
-        var fileName = fileNames.pop();
+async function downloadImages(fileNames) {
+    var fileName = fileNames.pop();
 
-        var params = {
-            Bucket: 'pruebas-autom',
-            Key: `vrt/test/${fileName}`
-        };
-        console.log('keyyyy', params.Key);
-        shell.mkdir('images');
-        const filePath = `./images/${fileName}`;
-        s3.getObject(params, (err, data) => {
-            if (err) console.error(err)
-            else {
-                console.log('Starting images download');
-                fs.writeFile(filePath, data.Body, (err) => {
-                    shell.exec(`unzip -o images/${fileName} -d images`);
-                    console.log(`${filePath} has been created!`)
-                    if (fileNames.length == 0) {
-                        console.log('length 0')
-                        getDiff(`${fileName1}/test1.jpg`, `${fileName2}/test2.jpg`);
-                    } else {
-                        console.log('length >0')
-                        downloadImages(filenames);
-                    }
-                })
-            }
-        })
-    }
+    var params = {
+        Bucket: 'pruebas-autom',
+        Key: `vrt/test/${fileName}`
+    };
+    console.log('keyyyy', params.Key);
+    shell.mkdir('images');
+    const filePath = `./images/${fileName}`;
+    s3.getObject(params, (err, data) => {
+        if (err) console.error(err)
+        else {
+            console.log('Starting images download');
+            fs.writeFile(filePath, data.Body, (err) => {
+                shell.exec(`unzip -o images/${fileName} -d images`);
+                console.log(`${filePath} has been created!`)
+                if (fileNames.length == 0) {
+                    console.log('length 0')
+                    getDiff(`${fileName1}/test1.jpg`, `${fileName2}/test2.jpg`);
+                } else {
+                    console.log('length >0')
+                    downloadImages(filenames);
+                }
+            })
+        }
+    })
+}
 
