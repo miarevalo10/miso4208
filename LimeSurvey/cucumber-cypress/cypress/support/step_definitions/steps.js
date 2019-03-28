@@ -1,4 +1,5 @@
-var appUrl = 'http://localhost:8888/index.php/admin/index';
+//var appUrl = 'http://ec2-3-87-196-16.compute-1.amazonaws.com/index.php/admin/index';
+var appUrl = 'http://ec2-3-87-196-16.compute-1.amazonaws.com/index.php/admin/authentication/sa/login';
 var data_mock;
 const RANDOM_COUNT = 1000
 const SEP_RANDOM = ":"
