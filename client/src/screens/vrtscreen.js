@@ -3,12 +3,32 @@ import axios from "axios";
 
 export default class Vrtscreen extends Component {
 
+    constructor(props) {
+        super(props);
+        this.state = {
+            file1:{},
+            file2:{}
+        }
+    }
 
+    changeFileOne(newFile) {
+        this.setState({
+            file1:newFile
+        })
+    }
 
-    sendMsg(msg) {
+    changeFileTwo(newFile) {
+        this.setState({
+            file2:newFile
+        })
+    }
+
+    sendMsg() {
         axios.post("http://localhost:3001/api/sendvrt", {
-            message: msg
+            first_file:this.state.file1,
+            second_file:this.state.file2
         });
+        axios.post("http://localhost:3001/api/sendvrt")
     };
 
     render() {
