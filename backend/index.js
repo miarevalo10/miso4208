@@ -52,6 +52,48 @@ router.post("/sendTest", (req, res) => {
     });
 });
 
+router.post('/sendvrt', (req,res) => {
+    var file1 = req.body.first_file;
+    var file2 = req.body.second_file;
+    var timestamp = + new Date();
+
+    var myBucket = 'vrt';
+    var myKey = 'file1_'+timestamp;
+    var mySecondKey = 'file2_'+timestamp;
+
+    params = {Bucket: myBucket, Key: myKey, Body: file1 };
+
+    s3.putObject(params, function(err, data) {
+
+        if (err) {
+
+            console.log(err)
+
+        } else {
+
+            console.log("Successfully uploaded data to myBucket/myKey");
+
+        }
+
+     });
+
+     params = {Bucket: myBucket, Key: mySecondKey, Body: file2 };
+
+     s3.putObject(params, function(err, data) {
+
+        if (err) {
+
+            console.log(err)
+
+        } else {
+
+            console.log("Successfully uploaded data to myBucket/myKey");
+
+        }
+
+     });
+});
+
 
 // append /api for our http requests
 app.use("/api", router);
