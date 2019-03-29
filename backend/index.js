@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+var morgan = require('morgan');
 
 const API_PORT = 3001;
 const app = express();
@@ -15,6 +16,8 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.use(bodyParser.json());
+
+app.use(morgan('combined'));
 
 //CORS middleware
 var allowCrossDomain = function (req, res, next) {
