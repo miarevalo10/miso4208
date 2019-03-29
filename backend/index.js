@@ -86,7 +86,7 @@ router.post("/test-upload", (request, response) => {
             const type = fileType(buffer);
             const timestamp = Date.now().toString();
             const fileName = `apks/${timestamp}-lg`;
-            console.log("ok "+process.env.AWS_ACCESS_KEY_ID+" - "+ process.env.AWS_SECRET_ACCESS_KEY);
+            
             const data = await uploadFile(buffer, fileName, type);
             return response.status(200).send(data);
         } catch (error) {
@@ -96,47 +96,28 @@ router.post("/test-upload", (request, response) => {
     });
 });
 
-router.post('/sendvrt', (req, res) => {
-    var file1 = req.body.first_file;
-    var file2 = req.body.second_file;
-    var timestamp = + new Date();
 
-    var myBucket = 'vrt';
-    var myKey = 'file1_' + timestamp;
-    var mySecondKey = 'file2_' + timestamp;
 
-    params = { Bucket: myBucket, Key: myKey, Body: file1 };
-
-    s3.putObject(params, function (err, data) {
-
-        if (err) {
-
-            console.log(err)
-
-        } else {
-
-            console.log("Successfully uploaded data to myBucket/myKey");
-
-        }
-
-    });
-
-    params = { Bucket: myBucket, Key: mySecondKey, Body: file2 };
-
-    s3.putObject(params, function (err, data) {
-
-        if (err) {
-
-            console.log(err)
-
-        } else {
-
-            console.log("Successfully uploaded data to myBucket/myKey");
-
-        }
-
-    });
+router.get("/get-apks",(req,res)=>{
+    var params = {
+        Bucket: "pruebas-autom",
+        Prefix: "apks/",
+        Delimiter: "/", 
+        MaxKeys: 3
+       };
+       console.log("ok "+process.env.AWS_ACCESS_KEY_ID+" - "+ process.env.AWS_SECRET_ACCESS_KEY);
+       s3.listObjects(params, function(err, data) {
+         if (err) {
+             console.log(err, err.stack);
+             return res.status(400).send(err);
+         } else {
+            console.log(data);
+            return res.status(200).send(data);
+         }     
+       });
 });
+
+    
 
 
 // append /api for our http requests

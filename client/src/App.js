@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import Vrtscreen from './screens/vrtscreen.js';
 import Reportscreen from './screens/reportscreen.js';
 import Home from './screens/homescreen.js';
+import NewTestRun from './screens/NewTestRun';
 
 
 class App extends Component {
@@ -17,6 +18,9 @@ class App extends Component {
           </button>
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul lass="navbar-nav mr-auto">
+            <li className="nav-item active">
+                <Link  to="/new-test">New test</Link>
+              </li>
               <li className="nav-item active">
                 <Link  to="/">vrt</Link>
               </li>
@@ -37,6 +41,7 @@ class App extends Component {
         <Route path="/about" component={Reportscreen} />
         <Route path="/sendmessage" component={Home} />
         <Route path="/topics" component={Topics} />
+        <Route path="/new-test" component={NewTestRun} />
       </Router>
     );
   }
