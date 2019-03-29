@@ -1,19 +1,22 @@
 var AWS = require('aws-sdk');
 const fs = require('fs')
 var shell = require('shelljs');
+var TestModel = require('./models/testMonkey');
+let db = require('./database');
 
 AWS.config.update({ region: 'us-west-2' });
 var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 var s3 = new AWS.S3();
 
-
 var params = {
   QueueUrl: process.env.SQS_RANDOM_MONKEY
 };
 
-launchEmulator();
+//launchEmulator();
 
 var receiptHandle = "";
+const basePath = './apks/'
+
 
 const rcvMsg = () => {
   sqs.receiveMessage(params, function (err, data) {
@@ -59,8 +62,23 @@ function runMonkeyTest(events, packageName, apkName) {
 
   var adb = process.env.ANDROID_PLATFORM_TOOLS + './adb';
   console.log('installing', shell.exec(adb + ' install apks/' + apkName).stdout);
-  shell.exec(adb + ' shell monkey -p ' + packageName + ' -v ' + events);
-  deleteMessage();
+  const seedRandom = getRandomInt(1, 100000);
+  shell.exec(adb + ' shell monkey -p ' + packageName + ' -s ' + seedRandom + ' -v ' + events );
+  let msg = new TestModel({
+    timestamp: Date.now(),
+    apkVersion: apkName,
+    seed: seedRandom
+  });
+  console.log('msg',msg);
+  msg.save()
+   .then(doc => {
+     console.log('docsaveddd',doc);
+   })
+   .catch(err => {
+     console.error(err)
+   })
+
+  //deleteMessage();
 }
 
 const downloadFile = (test) => {
@@ -69,9 +87,10 @@ const downloadFile = (test) => {
     Bucket: 'pruebas-autom',
     Key: 'apks/' + test.apkName
   };
-
-  shell.mkdir('apks');
-  const filePath = "apks/" + test.apkName;
+  if (!fs.existsSync(basePath)) {
+    fs.mkdirSync(basePath);
+  }
+  const filePath = basePath + test.apkName;
   s3.getObject(params, (err, data) => {
     if (err) console.error(err)
     else {
@@ -83,4 +102,8 @@ const downloadFile = (test) => {
   })
 }
 
-
+const getRandomInt = (min, max) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
