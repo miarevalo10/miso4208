@@ -85,5 +85,3 @@ const runTestingSet = (apkName) => {
 
 
 downloadApk({ apkName: 'me.kuehle.carreport_79.apk', features: 'car_report_features.zip' })
-// resigns apk
-// runs calabash tests
