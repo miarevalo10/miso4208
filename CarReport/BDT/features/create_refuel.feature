@@ -23,6 +23,7 @@ Feature: Create a refuel register
     Then I see "Add refueling"
     When I press view with id "menu_save"
     Then I should see "Has to be greater 0"
+    Then I take a screenshot
 
 
 

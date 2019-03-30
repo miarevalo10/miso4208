@@ -17,3 +17,4 @@ Feature: Create an other expenditure register
     Then I should see "Expenditure BDD"
     Then I should see "200"
     Then I should see "666.00"
+    Then I take a screenshot

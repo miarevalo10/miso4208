@@ -3,6 +3,8 @@ const compareImages = require("resemblejs/compareImages");
 const fs = require("mz/fs")
 var shell = require('shelljs');
 var AdmZip = require('adm-zip');
+let db = require('./database');
+var VRTModel = require('./models/testVRT');
 
 var params = {
     QueueUrl: process.env.SQS_VRT
@@ -13,13 +15,18 @@ AWS.config.update({ region: 'us-west-2' });
 var s3 = new AWS.S3();
 var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 const basePath = './vrt/';
+const featuresFile = 'features.zip';
+var cont = 0;
 
 /**
  * Msg example expected from queue
- * { imgLocation: 'images.zip' }
+ * { apkv1: 'me.kuehle.carreport_79.apk', apkv2: 'me.kuehle.carreport_79.apk', features: 'test/features.zip' }
  */
 
-//var t = setInterval(rcvMsg, 2000);
+launchEmulator();
+createVRTFolder();
+
+var t = setInterval(rcvMsg, 2000);
 
 function rcvMsg() {
     sqs.receiveMessage(params, function (err, data) {
@@ -29,10 +36,8 @@ function rcvMsg() {
                 var test = data.Messages[0].Body;
                 console.log('msg rcv', JSON.parse(test));
                 receiptHandle = data.Messages[0].ReceiptHandle;
-                filenames = [JSON.parse(test).fileName1, JSON.parse(test).fileName2]
-                downloadImages(filenames);
-
-
+                //                downloadAll({ apkv1: 'me.kuehle.carreport_79.apk', apkv2: 'me.kuehle.carreport_79.apk', features: 'test/features.zip' })
+                downloadApk(JSON.parse(test));
             } else {
                 console.log('no new msgs');
             }
@@ -40,6 +45,130 @@ function rcvMsg() {
     });
 }
 
+function createVRTFolder() {
+    if (!fs.existsSync(basePath)) {
+        fs.mkdirSync(basePath);
+    }
+    shell.cd(basePath);
+}
+
+function launchEmulator() {
+    var emulatorName = process.argv[2];
+    var emulatorTool = process.env.ANDROID_TOOLS + './emulator';
+    shell.exec(emulatorTool + ' -avd ' + emulatorName, { async: true });
+}
+
+
+function downloadApk(test) {
+    if (cont == 0 || cont == 1) {
+        if (cont == 0) {
+            apkName = test.apkv1;
+            cont++;
+        } else if (cont == 1) {
+            apkName = test.apkv2;
+            cont++;
+        }
+
+        var params = {
+            Bucket: 'pruebas-autom',
+            Key: 'apks/' + apkName
+        };
+        console.log('key', params.Key);
+
+        const filePath = apkName;
+        console.log('filepath', filePath);
+        s3.getObject(params, (err, data) => {
+            if (err) console.error(err)
+            else {
+                console.log('Starting ' + apkName + ' download');
+                fs.writeFileSync(filePath, data.Body);
+                console.log(`${filePath} has been created!`);
+                resignApk(apkName);
+                downloadApk(test);
+            }
+        })
+    } else if (cont == 2) {
+        downloadFeatures(test);
+    }
+}
+
+function downloadFeatures(test) {
+    var params = {
+        Bucket: 'pruebas-autom',
+        Key: 'vrt/' + test.features
+    };
+    console.log('key', params.Key);
+
+    const filePath = featuresFile;
+    s3.getObject(params, (err, data) => {
+        if (err) console.error(err)
+        else {
+            console.log('Starting features download');
+            fs.writeFileSync(filePath, data.Body);
+            unzipFile(featuresFile);
+            runCalabash(test.apkv1, './v1');
+            runCalabash(test.apkv2, './v2');
+            compareAllImages(test);
+        }
+    })
+}
+
+function unzipFile(location) {
+    const filePath = location;
+    console.log(filePath, 'filepath')
+    var zip = new AdmZip(filePath);
+    zip.extractAllTo('./', true);
+}
+
+
+function createVersionFolder(folderName) {
+    if (!fs.existsSync(folderName)) {
+        fs.mkdirSync(folderName);
+    }
+    shell.mv('screenshot*', folderName);
+}
+
+
+function resignApk(apkName) {
+    console.log('resign app', apkName);
+    shell.exec(`calabash-android resign ${apkName}`);
+}
+
+function runCalabash(apkName, version) {
+    console.log('starting to run calabash');
+    shell.exec(`calabash-android run ${apkName}`);
+    createVersionFolder(version);
+
+}
+
+function compareAllImages(test) {
+    if (!fs.existsSync('output')) {
+        fs.mkdirSync('output');
+    }
+    fs.readdirSync('v1').forEach(file => {
+        var ofileName = file.substr(0, file.lastIndexOf(".")) + ".png";
+        getDiff(`./v1/${file}`, `./v2/${file}`, ofileName);
+    });
+    saveDB(test);
+    deleteMessage();
+}
+
+function saveDB(test) {
+    let test = new VRTModel({
+        timestamp: Date.now(),
+        apkV1: test.apkv1,
+        apkV2: test.apkv2,
+        output: 'vrt/test/output'
+      });
+    
+      test.save()
+       .then(doc => {
+         console.log('doc saved',doc);
+       })
+       .catch(err => {
+         console.error(err)
+       })
+}
 async function getDiff(img1, img2, output) {
     const options = {
         output: {
@@ -89,6 +218,22 @@ function uploadImage(file, name) {
     });
 }
 
+function deleteMessage() {
+    var deleteParams = {
+        QueueUrl: params.QueueUrl,
+        ReceiptHandle: receiptHandle
+    };
+
+    sqs.deleteMessage(deleteParams, function (err, data) {
+        if (err) {
+            console.log("Delete Error", err);
+        } else {
+            console.log("Message Deleted", data);
+        }
+    });
+}
+
+
 function downloadImages(test) {
 
     var params = {
@@ -103,6 +248,7 @@ function downloadImages(test) {
     s3.getObject(params, (err, data) => {
         if (err) console.error(err)
         else {
+
             console.log('Starting images download');
             fs.writeFileSync(filePath, data.Body);
             unzipFile(test.imgLocation);
@@ -110,26 +256,4 @@ function downloadImages(test) {
         }
     })
 }
-
-function compareAllImages(folderName) {
-    shell.cd(basePath + folderName);
-    if (!fs.existsSync('output')) {
-        fs.mkdirSync('output');
-    }
-
-    fs.readdirSync('v1').forEach(file => {
-        var ofileName = file.substr(0, file.lastIndexOf(".")) + ".png";
-        getDiff(`./v1/${file}`, `./v2/${file}`, ofileName);
-    });
-}
-
-function unzipFile(location) {
-    const filePath = basePath + location;
-    console.log(filePath, 'filepath')
-    var zip = new AdmZip(filePath);
-    zip.extractAllTo(basePath, true);
-}
-
-
-downloadImages({ imgLocation: 'images.zip' })
 

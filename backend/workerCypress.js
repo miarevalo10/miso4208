@@ -100,7 +100,6 @@ function addReportConfiguration(data) {
       overwrite: false,
       html: false,
       json: true
-
   }
   fs.writeFileSync(cypressConfigFile, JSON.stringify(cypress_cfg, null, 4))
   shell.exec('npm install --save-dev mocha@5.2.0 mochawesome@3.1.1')

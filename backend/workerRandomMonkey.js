@@ -73,13 +73,13 @@ function runMonkeyTest(events, packageName, apkName) {
 
   test.save()
    .then(doc => {
-     console.log('docsaveddd',doc);
+     console.log('doc saved',doc);
    })
    .catch(err => {
      console.error(err)
    })
 
-  //deleteMessage();
+  deleteMessage();
 }
 
 const downloadFile = (test) => {

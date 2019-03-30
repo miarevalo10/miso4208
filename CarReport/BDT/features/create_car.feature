@@ -6,6 +6,7 @@ Feature: Create a car
      Then I see "ADD CAR"
      When I press view with id "menu_save"
      Then I see "Must not be empty"
+     Then I take a screenshot
 
   @reset @current
   Scenario: Create a car succesfully
@@ -15,3 +16,4 @@ Feature: Create a car
     Then I enter text "666" into field with id "edt_initial_mileage"
     When I press view with id "menu_save"
     Then I see "Reports" 
+    Then I take a screenshot
