@@ -51,7 +51,8 @@ const downloadFeatures = (test) => {
   console.log('keyyyy', params.Key);
   if (!fs.existsSync(basePath)) {
     fs.mkdirSync(basePath);
-  }  const filePath = basePath + 'features.zip';
+  }  
+  const filePath = basePath + featuresFile;
   s3.getObject(params, (err, data) => {
     if (err) console.error(err)
     else {
