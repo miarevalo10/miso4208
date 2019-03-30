@@ -14,6 +14,10 @@ var s3 = new AWS.S3();
 var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 const basePath = './vrt/';
 
+/**
+ * Msg example expected from queue
+ * { imgLocation: 'images.zip' }
+ */
 
 //var t = setInterval(rcvMsg, 2000);
 
@@ -37,7 +41,6 @@ function rcvMsg() {
 }
 
 async function getDiff(img1, img2, output) {
-    console.log('comparing ', img1, 'agaisnt', img2);
     const options = {
         output: {
             errorColor: {
@@ -55,21 +58,16 @@ async function getDiff(img1, img2, output) {
         ignore: "less"
     };
 
-    // The parameters can be Node Buffers
-    // data is the same as usual with an additional getBuffer() function
     const data = await compareImages(
         fs.readFileSync(img1),
         fs.readFileSync(img2),
         options
     );
+    fs.writeFileSync("./output/" + output, data.getBuffer());
 
-    console.log('tempfilename', output);
-    fs.writeFileSync("./output/"+output, data.getBuffer());
-
-    uploadImage("./output/"+output, output);
+    uploadImage("./output/" + output, output);
 }
 
-//Subir screenshots a s3
 function uploadImage(file, name) {
     fs.readFile(file, function (err, data) {
         if (err) { throw err; }
@@ -97,7 +95,7 @@ function downloadImages(test) {
         Bucket: 'pruebas-autom',
         Key: `vrt/test/${test.imgLocation}`
     };
-    console.log('keyyyy', params.Key);
+    console.log('key', params.Key);
     if (!fs.existsSync(basePath)) {
         fs.mkdirSync(basePath);
     }
@@ -114,16 +112,13 @@ function downloadImages(test) {
 }
 
 function compareAllImages(folderName) {
-    console.log('path images', basePath + folderName);
     shell.cd(basePath + folderName);
     if (!fs.existsSync('output')) {
         fs.mkdirSync('output');
     }
 
     fs.readdirSync('v1').forEach(file => {
-        console.log(file);
         var ofileName = file.substr(0, file.lastIndexOf(".")) + ".png";
-
         getDiff(`./v1/${file}`, `./v2/${file}`, ofileName);
     });
 }

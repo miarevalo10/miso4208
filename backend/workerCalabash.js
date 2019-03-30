@@ -42,7 +42,7 @@ const downloadApk = (test) => {
     }
   })
 }
-// Downloads features zip and saves it to calabash folder
+
 const downloadFeatures = (test) => {
   var params = {
     Bucket: 'pruebas-autom',
