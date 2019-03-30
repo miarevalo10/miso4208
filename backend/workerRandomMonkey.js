@@ -15,7 +15,7 @@ var params = {
 //launchEmulator();
 
 var receiptHandle = "";
-const basePath = './apks/'
+const basePath = './apks/';
 
 
 const rcvMsg = () => {
@@ -64,13 +64,14 @@ function runMonkeyTest(events, packageName, apkName) {
   console.log('installing', shell.exec(adb + ' install apks/' + apkName).stdout);
   const seedRandom = getRandomInt(1, 100000);
   shell.exec(adb + ' shell monkey -p ' + packageName + ' -s ' + seedRandom + ' -v ' + events );
-  let msg = new TestModel({
+
+  let test = new TestModel({
     timestamp: Date.now(),
     apkVersion: apkName,
     seed: seedRandom
   });
-  console.log('msg',msg);
-  msg.save()
+
+  test.save()
    .then(doc => {
      console.log('docsaveddd',doc);
    })

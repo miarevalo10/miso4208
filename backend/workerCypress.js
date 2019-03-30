@@ -13,7 +13,12 @@ var params = {
 };
 
 var receiptHandle = "";
-const basePath = './cypress/'
+const basePath = './cypress/';
+
+/**
+ * Msg example expected from queue
+ * {testingSet: 'cucumber-cypress.zip', project: 'cucumber-cypress'}
+ */
 
 const rcvMsg = () => {
   sqs.receiveMessage(params, function (err, data) {
@@ -24,7 +29,6 @@ const rcvMsg = () => {
         console.log('msg rcv', JSON.parse(test));
         receiptHandle = data.Messages[0].ReceiptHandle;
         downloadFile(JSON.parse(test));
-
       } else {
         console.log('no new msgs');
       }
@@ -56,7 +60,7 @@ function unzipFile(data) {
 }
 
 function runTestingSet(data) {
-  shell.cd(basePath + data.project)
+  shell.cd(basePath+data.project)
   shell.exec('npm i')
   shell.exec('npx cypress run .').output
   deleteMessage()
@@ -73,14 +77,18 @@ const downloadFile = (data) => {
     fs.mkdirSync(basePath);
   }
   const filePath = basePath + data.testingSet
-  s3.getObject(params, (err, data) => {
+  s3.getObject(params, (err, dataS3) => {
     if (err) console.error(err)
     else {
       console.log('Starting ' + data.testingSet + ' download');
-      fs.writeFileSync(filePath, data.Body.toString())
+      fs.writeFileSync(filePath, dataS3.Body)
       console.log(`${filePath} has been created!`)
       unzipFile(data)
       runTestingSet(data)
     }
   })
 }
+
+//downloadFile({testingSet: 'cucumber-cypress.zip', project: 'cucumber-cypress'});
+
+
