@@ -16,13 +16,12 @@ export default class NewTestRun extends Component {
                 "Behaviour Driven",
                 "Visual Regression"
             ],
-            typeSelected: "Monkey",
             technologies: [
+                "Monkey",
                 "Calabash",
-                "Cypress",
                 "Espresso"
             ],
-            technology: "Calabash",
+            technology: "Monkey",
             packageName: "",
             events: 100,
             seed: 1234
@@ -52,12 +51,6 @@ export default class NewTestRun extends Component {
         });
     }
 
-    onTypeOptionChanged = (event) => {
-        this.setState({
-            typeSelected: event.target.value,
-        });
-    }
-
     onTechnologyOptionChanged = (event) => {
         this.setState({
             technology: event.target.value,
@@ -69,13 +62,7 @@ export default class NewTestRun extends Component {
             var list = apk.Key.split("/")
             var key = list[1];
             return <option key={key} value={key}>{key}</option>
-        
-        })
-    }
 
-    renderListTesting() {
-        return this.state.testsTypes.map((type) => {
-            return <option key={type} value={type}>{type}</option>
         })
     }
 
@@ -86,57 +73,52 @@ export default class NewTestRun extends Component {
     }
 
     renderTechnologySection() {
-        if (this.state.typeSelected.localeCompare("Monkey")) {
-            return (<div>
-                <h4>Technologie to use</h4>
-                <select
-                    onChange={this.onTechnologyOptionChanged}
-                    className="form-control">
-                    {this.renderListTechnologies()}
-                </select>
-            </div>);
-        } else {
-            return (
-                <div>
-                    <div className="form-group">
-                        <label htmlFor="events">Number of events</label>
-                        <div className="input-group">
-                            <input
-                                type="number"
-                                value={this.state.events}
-                                onChange={this.handleChangeEvents}
-                                className="form-control"
-                                id="events"
-                                required />
-                            <div className="invalid-feedback">
-                                Please provide a number of events name
+        switch (this.state.technology) {
+            case "Monkey":
+                return (
+                    <div>
+                        <div className="form-group">
+                            <label htmlFor="events">Number of events</label>
+                            <div className="input-group">
+                                <input
+                                    type="number"
+                                    value={this.state.events}
+                                    onChange={this.handleChangeEvents}
+                                    className="form-control"
+                                    id="events"
+                                    required />
+                                <div className="invalid-feedback">
+                                    Please provide a number of events name
+                            </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="seed">Seed</label>
-                        <div className="input-group">
-                            <input
-                                type="number"
-                                value={this.state.seed}
-                                onChange={this.handleChangeSeed}
-                                className="form-control"
-                                id="seed"
-                                required />
-                            <div className="invalid-feedback">
-                                Please provide a number of events name
+                        <div className="form-group">
+                            <label htmlFor="seed">Seed</label>
+                            <div className="input-group">
+                                <input
+                                    type="number"
+                                    value={this.state.seed}
+                                    onChange={this.handleChangeSeed}
+                                    className="form-control"
+                                    id="seed"
+                                    required />
+                                <div className="invalid-feedback">
+                                    Please provide a number of events name
+                            </div>
                             </div>
                         </div>
-                    </div>
+                    </div>);
+            default:
+                return (<div>
                 </div>);
         }
     }
 
     renderMessage() {
         if (this.state.apkSelected === "") {
-            return <h2>Please select the file you want to test</h2>
+            return <h5>Please select the file you want to test</h5>
         } else {
-            return <button className="btn btn-primary" type="submit">I want to run {this.state.typeSelected} testing
+            return <button className="btn btn-primary" type="submit">I want to run {this.state.technology} testing
             on the {this.state.apkSelected} file.</button>
 
         }
@@ -155,7 +137,7 @@ export default class NewTestRun extends Component {
     }
 
     handleSubmit = (event) => {
-        alert('A name was submitted: ' + this.state.value);
+        alert("The test was submitted succesfully!");
         event.preventDefault();
         if (this.state.apkSelected === "") {
             return;
@@ -164,7 +146,7 @@ export default class NewTestRun extends Component {
 
         axios.post("http://localhost:3001/api/sendTest", {
             apkName: this.state.apkSelected,
-            queue: this.state.typeSelected,
+            queue: this.state.technology,
             packageName: this.state.packageName,
             events: this.state.events,
             seed: this.state.seed
@@ -173,7 +155,7 @@ export default class NewTestRun extends Component {
 
     render() {
         return (
-            <div className="container">
+            <div className="container-fluid border border-primary">
 
                 <h1>New test run</h1>
                 <br /><br />
@@ -202,15 +184,17 @@ export default class NewTestRun extends Component {
                             </div>
                         </div>
                     </div>
-                    <div className="form-group">
-                        <label htmlFor="testing">Testing to be made</label>
+                    <div className="input-group">
+                        <label htmlFor="techonology">Technology</label>
+                        <div className="input-group">
                         <select
-                            required
-                            id="testing"
-                            onChange={this.onTypeOptionChanged}
+                            id="techonology"
+                            onChange={this.onTechnologyOptionChanged}
                             className="form-control">
-                            {this.renderListTesting()}
+                            {this.renderListTechnologies()}
                         </select>
+                        </div>
+
                     </div>
                     <div className="form-group">
                         {this.renderTechnologySection()}
@@ -218,16 +202,9 @@ export default class NewTestRun extends Component {
                     <div className="form-group">
                         {this.renderMessage()}
                     </div>
+
                 </form>
 
-                <br />
-                <br />
-                <hr />
-
-                <FileUpload title="Upload script if needed" />
-                <br />
-                <hr />
-                <FileUpload title="Upload apk if needed" />
 
             </div>
         )

@@ -55,7 +55,9 @@ export default class FileUpload extends Component {
                     
                     <input label='upload file' type='file' onChange={this.handleFileUpload} />
                     <br />
+                    <br />
                     <button className="btn btn-primary" type='submit'>Upload</button>
+                    <br />
                     <br />
                     <h4>{this.renderMessage()}</h4>
                 </form>

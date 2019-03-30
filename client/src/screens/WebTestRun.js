@@ -92,6 +92,7 @@ export default class WebTestRun extends Component {
             script: this.state.script,
             queue: this.state.technology
         });
+        alert("The test was submitted succesfully!");
     }
 
     renderDetails() {
@@ -115,8 +116,8 @@ export default class WebTestRun extends Component {
 
     render() {
         return (
-            <div className="container">
-                <h1>New  web test run</h1>
+            <div className="container-fluid border border-primary">
+                <h1>New web test run</h1>
                 <br /><br />
                 <form onSubmit={this.handleSubmit}>
 
@@ -133,6 +134,7 @@ export default class WebTestRun extends Component {
                         Run {this.state.technology}
                     </button>
                 </form>
+                <br/>
             </div>
         )
     }

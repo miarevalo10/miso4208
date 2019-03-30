@@ -51,13 +51,13 @@ router.post("/sendTest", (req, res) => {
                 "packageName": req.body.packageName,
                 "seed": req.body.seed
             }
-            queue = process.env.SQS_RANDOM_MONKEY || "https://sqs.us-west-2.amazonaws.com/210095785148/RANDOM_MONKEY"
+            queue = process.env.SQS_RANDOM_MONKEY
         case "Cypress":
             msg = {
                 "testingSet": req.body.apkName,
                 "project": req.body.project ||"cucumber-cypress",
             }
-            queue = process.env.SQS_CYPRESS || "https://sqs.us-west-2.amazonaws.com/210095785148/Cypress"
+            queue = process.env.SQS_CYPRESS
     }
     var params = {
         DelaySeconds: 0,
