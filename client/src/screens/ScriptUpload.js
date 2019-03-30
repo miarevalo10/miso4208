@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import axios from "axios";
 
-export default class FileUpload extends Component {
+export default class ScriptUpload extends Component {
 
     constructor(props) {
         super(props);
@@ -9,7 +9,7 @@ export default class FileUpload extends Component {
             file: null,
             success: false,
             message: "",
-            title: props.title || "Upload file"
+            title: props.title || "Upload script"
         };
     }
 
@@ -17,7 +17,7 @@ export default class FileUpload extends Component {
         event.preventDefault();
         const formData = new FormData();
         formData.append('file', this.state.file[0]);
-        axios.post("http://localhost:3001/api/apk-upload", formData, {
+        axios.post("http://localhost:3001/api/script-upload", formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -52,10 +52,11 @@ export default class FileUpload extends Component {
             <div>
                 <h4>{this.state.title}</h4>
                 <form onSubmit={this.submitFile}>
-                    
                     <input label='upload file' type='file' onChange={this.handleFileUpload} />
                     <br />
+                    <br />
                     <button className="btn btn-primary" type='submit'>Upload</button>
+                    <br />
                     <br />
                     <h4>{this.renderMessage()}</h4>
                 </form>
