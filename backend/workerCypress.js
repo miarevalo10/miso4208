@@ -62,6 +62,7 @@ function unzipFile(data) {
 function runTestingSet(data) {
   shell.cd(basePath+data.project)
   shell.exec('npm i')
+  addReportConfiguration(data)
   shell.exec('npx cypress run .').output
   deleteMessage()
 }
@@ -87,6 +88,22 @@ const downloadFile = (data) => {
       runTestingSet(data)
     }
   })
+}
+
+function addReportConfiguration(data) {
+  let cypressConfigFile = "." + cypressConfig
+  let contenido = fs.readFileSync(cypressConfigFile)
+  let cypress_cfg = JSON.parse(contenido)
+  cypress_cfg.reporter = "mochawesome"
+  cypress_cfg.reporterOptions = {
+      reportDir: "cypress/results",
+      overwrite: false,
+      html: false,
+      json: true
+
+  }
+  fs.writeFileSync(cypressConfigFile, JSON.stringify(cypress_cfg, null, 4))
+  shell.exec('npm install --save-dev mocha@5.2.0 mochawesome@3.1.1')
 }
 
 //downloadFile({testingSet: 'cucumber-cypress.zip', project: 'cucumber-cypress'});
