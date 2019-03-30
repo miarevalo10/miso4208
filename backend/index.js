@@ -40,17 +40,29 @@ app.use(allowCrossDomain);
 
 router.post("/sendTest", (req, res) => {
     // La idea sería mandar estos params desde el front
-    console.log('sendtest', req.body.message);
-    var msg = {
-        "apkName": "me.kuehle.carreport_79.apk",
-        "events": "1000",
-        "packageName": "me.kuehle.carreport"
+    console.log('sendtest', req.body);
+    var msg = {}
+    var queue = ""
+    switch (req.body.queue) {
+        case "Monkey":
+            msg = {
+                "apkName": req.body.apkName,
+                "events": req.body.events,
+                "packageName": req.body.packageName,
+                "seed": req.body.seed
+            }
+            queue = process.env.SQS_RANDOM_MONKEY
+        case "Cypress":
+            msg = {
+                "testingSet": req.body.apkName,
+                "project": req.body.project ||"cucumber-cypress",
+            }
+            queue = process.env.SQS_CYPRESS
     }
-    var msg = req.body.message;
     var params = {
         DelaySeconds: 0,
         MessageBody: JSON.stringify(msg),
-        QueueUrl: process.env.SQS_RANDOM_MONKEY
+        QueueUrl: queue
     };
 
     sqs.sendMessage(params, function (err, data) {
@@ -68,7 +80,7 @@ const uploadFile = (buffer, name, type) => {
     const params = {
         ACL: 'public-read',
         Body: buffer,
-        Bucket: process.env.S3_BUCKET,
+        Bucket: process.env.S3_BUCKET || "pruebas-autom",
         ContentType: type.mime,
         Key: `${name}.${type.ext}`
     };
@@ -76,7 +88,7 @@ const uploadFile = (buffer, name, type) => {
 };
 
 // Define POST route
-router.post("/test-upload", (request, response) => {
+router.post("/apk-upload", (request, response) => {
     const form = new multiparty.Form();
     form.parse(request, async (error, fields, files) => {
         if (error) throw new Error(error);
@@ -86,7 +98,28 @@ router.post("/test-upload", (request, response) => {
             const type = fileType(buffer);
             const timestamp = Date.now().toString();
             const fileName = `apks/${timestamp}-lg`;
-            
+
+            const data = await uploadFile(buffer, fileName, type);
+            return response.status(200).send(data);
+        } catch (error) {
+            console.log(error)
+            return response.status(400).send(error);
+        }
+    });
+});
+
+// Define POST route
+router.post("/script-upload", (request, response) => {
+    const form = new multiparty.Form();
+    form.parse(request, async (error, fields, files) => {
+        if (error) throw new Error(error);
+        try {
+            const path = files.file[0].path;
+            const buffer = fs.readFileSync(path);
+            const type = fileType(buffer);
+            const timestamp = Date.now().toString();
+            const fileName = `scripts/${timestamp}-lg`;
+
             const data = await uploadFile(buffer, fileName, type);
             return response.status(200).send(data);
         } catch (error) {
@@ -98,26 +131,45 @@ router.post("/test-upload", (request, response) => {
 
 
 
-router.get("/get-apks",(req,res)=>{
+router.get("/get-apks", (req, res) => {
     var params = {
         Bucket: "pruebas-autom",
         Prefix: "apks/",
-        Delimiter: "/", 
+        Delimiter: "/",
         MaxKeys: 3
-       };
-       console.log("ok "+process.env.AWS_ACCESS_KEY_ID+" - "+ process.env.AWS_SECRET_ACCESS_KEY);
-       s3.listObjects(params, function(err, data) {
-         if (err) {
-             console.log(err, err.stack);
-             return res.status(400).send(err);
-         } else {
+    };
+    console.log("ok " + process.env.AWS_ACCESS_KEY_ID + " - " + process.env.AWS_SECRET_ACCESS_KEY);
+    s3.listObjects(params, function (err, data) {
+        if (err) {
+            console.log(err, err.stack);
+            return res.status(400).send(err);
+        } else {
             console.log(data);
             return res.status(200).send(data);
-         }     
-       });
+        }
+    });
 });
 
-    
+router.get("/get-script-cypress", (req, res) => {
+    var params = {
+        Bucket: "pruebas-autom",
+        Prefix: "cypress/",
+        Delimiter: "/",
+        MaxKeys: 3
+    };
+    console.log("ok " + process.env.AWS_ACCESS_KEY_ID + " - " + process.env.AWS_SECRET_ACCESS_KEY);
+    s3.listObjects(params, function (err, data) {
+        if (err) {
+            console.log(err, err.stack);
+            return res.status(400).send(err);
+        } else {
+            console.log(data);
+            return res.status(200).send(data);
+        }
+    });
+});
+
+
 
 
 // append /api for our http requests

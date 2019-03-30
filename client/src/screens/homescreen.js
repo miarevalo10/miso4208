@@ -1,21 +1,35 @@
 import React, { Component } from 'react';
-import axios from "axios";
-import FileUpload from './FileUpload';
 import NewTestRun from './NewTestRun';
+import WebTestRun from './WebTestRun';
+import FileUpload from './FileUpload';
+import ScriptUpload from './ScriptUpload';
 
 export default class Home extends Component {
-    sendMsg(msg){
-        axios.post("http://localhost:3001/api/sendTest", {
-          message: msg
-        });
-      };
 
     render() {
         return (
             <div className="App">
-                <button onClick={() => this.sendMsg('ubicacion test')}>Send Msg</button>
-                <FileUpload/>
-                <NewTestRun/>
+                <div className="container">
+                    <div className="row">
+                        <div className="col-12 col-lg-6">
+                            <NewTestRun />
+                        </div>
+                        <div className="col-12 col-lg-6">
+                            <WebTestRun />
+                        </div>
+                    </div>
+                </div>
+                <hr/>
+                <div className="container">
+                    <div className="row">
+                        <div className="col-12 col-md-6">
+                            <ScriptUpload title="Upload script if needed" />
+                        </div>
+                        <div className="col-12 col-msm-6">
+                            <FileUpload title="Upload apk if needed" />
+                        </div>
+                    </div>
+                </div>
             </div>
         );
 
