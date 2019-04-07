@@ -64,7 +64,11 @@ function runTestingSet(data) {
   shell.exec('npm i')
   addReportConfiguration(data)
   replaceCypressCucumbreLibrary()
+  shell.exec('rm -r cypress/results')
+  shell.exec('rm -r cypress/screenshots')
   shell.exec('npx cypress run .').output
+  shell.exec('npx mochawesome-merge --reportDir cypress/results > mochawesome.json')
+  shell.exec('npx mochawesome-report-generator -i  mochawesome.json')
   deleteMessage()
 }
 
@@ -98,12 +102,13 @@ function addReportConfiguration(data) {
   cypress_cfg.reporter = "mochawesome"
   cypress_cfg.reporterOptions = {
       reportDir: "cypress/results",
-      overwrite: false,
-      html: false,
+      overwrite: true,
+      html: true,
       json: true
   }
   fs.writeFileSync(cypressConfigFile, JSON.stringify(cypress_cfg, null, 4))
   shell.exec('npm install --save-dev mocha@5.2.0 mochawesome@3.1.1')
+  shell.exec('npm install --save-dev mochawesome-merge mochawesome-report-generator')
 }
 
 function replaceCypressCucumbreLibrary(){
