@@ -63,6 +63,7 @@ function runTestingSet(data) {
   shell.cd(basePath+data.project)
   shell.exec('npm i')
   addReportConfiguration(data)
+  replaceCypressCucumbreLibrary()
   shell.exec('npx cypress run .').output
   deleteMessage()
 }
@@ -103,6 +104,10 @@ function addReportConfiguration(data) {
   }
   fs.writeFileSync(cypressConfigFile, JSON.stringify(cypress_cfg, null, 4))
   shell.exec('npm install --save-dev mocha@5.2.0 mochawesome@3.1.1')
+}
+
+function replaceCypressCucumbreLibrary(){
+  shell.exec('rsync -a --delete ../../cypress-cucumber-preprocessor node_modules/')
 }
 
 //downloadFile({testingSet: 'cucumber-cypress.zip', project: 'cucumber-cypress'});
