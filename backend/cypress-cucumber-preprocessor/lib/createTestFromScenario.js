@@ -15,7 +15,7 @@ const stepTest = function(stepDetails, exampleRowData) {
     replaceParameterTags,
     exampleRowData
   );
-  cy.screenshot(cy.state('runnable').title+"/"+(stepDetails.index).pad(3)+stepDetails.keyword+stepDetails.text.replace("/",""))
+  cy.screenshot(cy.state('runnable').title.replace("/","")+"/"+(stepDetails.index).pad(3)+stepDetails.keyword+stepDetails.text.replace("/",""))
 };
 
 Number.prototype.pad = function (size) {
