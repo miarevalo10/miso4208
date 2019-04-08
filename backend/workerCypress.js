@@ -7,6 +7,11 @@ AWS.config.update({ region: 'us-west-2' });
 var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 var s3 = new AWS.S3();
 
+const basePath = './cypress/'
+const cypressConfig = '/cypress.json'
+const FEATURE_TOKEN = "Feature:"
+const URL_FRONT = 'http://localhost:5000/'
+const SCREENSHOTS_FOLDER = './cypress/screenshots/'
 
 var params = {
   QueueUrl: process.env.SQS_CYPRESS
@@ -67,6 +72,7 @@ function runTestingSet(data) {
   shell.exec('rm -r cypress/results')
   shell.exec('rm -r cypress/screenshots')
   shell.exec('npx cypress run .').output
+  changeResultsContextAndFolders('cypress/results/', listFeaturesFiles('cypress/integration/'))
   shell.exec('npx mochawesome-merge --reportDir cypress/results > mochawesome.json')
   shell.exec('npx mochawesome-report-generator -i  mochawesome.json')
   deleteMessage()
@@ -115,6 +121,40 @@ function replaceCypressCucumbreLibrary(){
   shell.exec('rsync -a --delete ../../cypress-cucumber-preprocessor node_modules/')
 }
 
+function listFeaturesFiles(dir) {
+  let lstFiles = {}
+  const files = fs.readdirSync(dir);
+  for (const file of files) {
+      var array = fs.readFileSync(dir + file).toString().split('\n');
+      for (let line of array) {
+          if (line.trim().startsWith(FEATURE_TOKEN)) {
+              lstFiles[line.replace(FEATURE_TOKEN, "").trim()] = file
+              break;
+          }
+      }
+  }
+  return lstFiles;
+}
+
+function changeResultsContextAndFolders(dir, lstFiles) {
+  const files = fs.readdirSync(dir);
+  for (const file of files) {
+      let content = fs.readFileSync(dir + file)
+      let result = JSON.parse(content)
+      let feature = result.suites.suites[0]
+      let baseDir = SCREENSHOTS_FOLDER + lstFiles[feature.title]
+      for (let test of feature.tests) {
+        test.context = '{\"title\": \"Detail:\",\"value\": \"' + URL_FRONT + test.uuid + '\"}'
+          if (fs.existsSync(baseDir +"/"+ test.title)) {
+              fs.renameSync(baseDir + "/" + test.title, baseDir + "/" + test.uuid)
+          }
+      }
+      if (fs.existsSync(baseDir)) {
+          fs.renameSync(baseDir, SCREENSHOTS_FOLDER+feature.uuid)
+      }
+      fs.writeFileSync(dir + file, JSON.stringify(result, null, 4))
+  }
+}
 //downloadFile({testingSet: 'cucumber-cypress.zip', project: 'cucumber-cypress'});
 
 
