@@ -1,19 +1,47 @@
-let mongoose = require('mongoose'); 
-const uri = "mongodb+srv://pruebas:pruebas123@cluster0-vwiez.mongodb.net/pruebasautom?retryWrites=true";
+var firebase = require('firebase-admin')
+var db
+
+var serviceAccount = require("./serviceAccountKey.json");
 
 class Database {
   constructor() {
     this._connect()
   }
-_connect() {
-    console.log('mongooosee');
-     mongoose.connect(uri,{ useNewUrlParser: true })
-       .then(() => {
-         console.log('Database connection successful')
-       })
-       .catch(err => {
-         console.error('Database connection error')
-       })
+  _connect() {
+    console.log('firebase');
+    firebase.initializeApp({
+      credential: firebase.credential.cert(serviceAccount),
+      databaseURL: "https://pruebas-autom.firebaseio.com"
+    });
+
+    db = firebase.database();
+
+    //var newProjectId = "-LbQxpuXbI9dVHD83BjD"
+
+    /*var projects = db.ref('projects/')
+    var newProjectId = projects.push().getKey()
+    projects.child(newProjectId).set({name:"LimeSurvey", type:"web"})
+    
+    var versions = db.ref('projects/'+newProjectId+'/versions/')
+    var newVersionId = versions.push().getKey()
+    versions.child(newVersionId).set({name:"1.0"})
+    
+    var process = db.ref('projects/'+newProjectId+'/process/')
+    var newProcessId = process.push().getKey()
+    process.child(newProcessId).set({type:"BDT", state:"waiting", file:"cucumber-cypress.zip"})
+    */
+
+    /*db.ref('projects/').once('value').then(function (snapshot) {
+      console.log(snapshot.val())
+    })*/
+  }
+
+  getInstance(){
+    return db;
+  }
+
+  getProcess(projectId, processId){
+    return db.ref('projects/' + projectId + "/process/" + processId)
   }
 }
 module.exports = new Database()
