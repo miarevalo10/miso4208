@@ -4,7 +4,8 @@ import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import Vrtscreen from './screens/vrtscreen.js';
 import Reportscreen from './screens/reportscreen.js';
 import Home from './screens/homescreen.js';
-import NewTestRun from './screens/NewTestRun';
+import NewTestRun from './screens/NewTestRun.js';
+import CreateApplication from './screens/CreateApplication.js';
 
 
 class App extends Component {
@@ -31,7 +32,7 @@ class App extends Component {
                 <Link  to="/sendmessage">Home</Link>
               </li >
               <li className="nav-item active">
-                <Link  to="/topics">Topics</Link>
+                <Link  to="/create-application">Create application</Link>
               </li>
             </ul>
           </div>
@@ -42,6 +43,7 @@ class App extends Component {
         <Route path="/sendmessage" component={Home} />
         <Route path="/topics" component={Topics} />
         <Route path="/new-test" component={NewTestRun} />
+        <Route path="/create-application" component={CreateApplication} />
       </Router>
     );
   }

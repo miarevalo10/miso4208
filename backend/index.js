@@ -5,12 +5,14 @@ const fs = require('fs');
 const fileType = require('file-type');
 const bluebird = require('bluebird');
 const multiparty = require('multiparty');
+const applications = require('./routes/applications');
+var AWS = require('aws-sdk');
 
 const API_PORT = 3001;
 const app = express();
 const router = express.Router();
 
-var AWS = require('aws-sdk');
+
 AWS.config.update({
     region: 'us-west-2',
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -20,15 +22,6 @@ AWS.config.setPromisesDependency(bluebird);
 var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 const s3 = new AWS.S3();
 
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
-
-app.use(bodyParser.json());
-
-app.use(morgan('combined'));
-
-//CORS middleware
 var allowCrossDomain = function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
@@ -36,7 +29,13 @@ var allowCrossDomain = function (req, res, next) {
     next();
 }
 
+
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
+app.use(morgan('combined'));
 app.use(allowCrossDomain);
+
+app.use('/applications', applications);
 
 router.post("/sendTest", (req, res) => {
     // La idea sería mandar estos params desde el front

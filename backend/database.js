@@ -40,6 +40,29 @@ class Database {
     return db;
   }
 
+  saveApplication(application){
+    const {
+      applicationName,
+      applicationType,
+      applicationArchitecture,
+      applicationLanguage,
+      applicationDescription,
+      minSdk,
+      maxSdk,
+      supportedBrowsers,
+  } = application;
+      db.ref('applications/').push({
+        applicationName,
+        applicationType,
+        applicationArchitecture,
+        applicationLanguage,
+        applicationDescription,
+        minSdk,
+        maxSdk,
+        supportedBrowsers,
+      });
+  }
+
   getProcess(projectId, processId){
     return db.ref('projects/' + projectId + "/process/" + processId)
   }

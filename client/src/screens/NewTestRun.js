@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import axios from "axios";
-import FileUpload from './FileUpload';
 
 export default class NewTestRun extends Component {
 
