@@ -36,11 +36,11 @@ class Database {
     })*/
   }
 
-  getInstance(){
+  getInstance() {
     return db;
   }
 
-  saveApplication(application){
+  saveApplication(application) {
     const {
       applicationName,
       applicationType,
@@ -50,20 +50,20 @@ class Database {
       minSdk,
       maxSdk,
       supportedBrowsers,
-  } = application;
-      db.ref('applications/').push({
-        applicationName,
-        applicationType,
-        applicationArchitecture,
-        applicationLanguage,
-        applicationDescription,
-        minSdk,
-        maxSdk,
-        supportedBrowsers,
-      });
+    } = application;
+    db.ref('applications/').push({
+      applicationName,
+      applicationType,
+      applicationArchitecture,
+      applicationLanguage,
+      applicationDescription,
+      minSdk,
+      maxSdk,
+      supportedBrowsers,
+    });
   }
 
-  getProcess(projectId, processId){
+  getProcess(projectId, processId) {
     return db.ref('projects/' + projectId + "/process/" + processId)
   }
 }
