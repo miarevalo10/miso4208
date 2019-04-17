@@ -9,7 +9,11 @@ router.use(function timeLog(req, res, next) {
 });
 
 router.get('/', function (req, res) {
-    res.send('Applications home page');
+    console.log("get all applications");
+    db.getApplications((data)=>{
+        console.log(data)
+        return res.status(200).send(data);
+    });
 });
 
 router.post("/create", (req, res) => {

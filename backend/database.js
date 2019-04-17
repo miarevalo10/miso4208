@@ -66,5 +66,11 @@ class Database {
   getProcess(projectId, processId) {
     return db.ref('projects/' + projectId + "/process/" + processId)
   }
+
+  getApplications(callback) {
+    return db.ref('applications/').once('value').then((snapshot) => {
+      callback(snapshot.val())
+    });
+  }
 }
 module.exports = new Database()

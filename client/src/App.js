@@ -3,7 +3,7 @@ import './App.css';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import Vrtscreen from './screens/vrtscreen.js';
 import Reportscreen from './screens/reportscreen.js';
-import Home from './screens/homescreen.js';
+import Home from './screens/Homescreen.js';
 import NewTestRun from './screens/NewTestRun.js';
 import CreateApplication from './screens/CreateApplication.js';
 
