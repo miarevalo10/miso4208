@@ -110,6 +110,8 @@ export default class WebTestRun extends Component {
                         {this.renderListScripts()}
                     </select>
                 </div>);
+            default:
+                return (<div>Technology not recognized</div>);
         }
     }
 

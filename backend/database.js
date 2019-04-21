@@ -36,12 +36,41 @@ class Database {
     })*/
   }
 
-  getInstance(){
+  getInstance() {
     return db;
   }
 
-  getProcess(projectId, processId){
+  saveApplication(application) {
+    const {
+      applicationName,
+      applicationType,
+      applicationArchitecture,
+      applicationLanguage,
+      applicationDescription,
+      minSdk,
+      maxSdk,
+      supportedBrowsers,
+    } = application;
+    db.ref('applications/').push({
+      applicationName,
+      applicationType,
+      applicationArchitecture,
+      applicationLanguage,
+      applicationDescription,
+      minSdk,
+      maxSdk,
+      supportedBrowsers,
+    });
+  }
+
+  getProcess(projectId, processId) {
     return db.ref('projects/' + projectId + "/process/" + processId)
+  }
+
+  getApplications(callback) {
+    return db.ref('applications/').once('value').then((snapshot) => {
+      callback(snapshot.val())
+    });
   }
 }
 module.exports = new Database()
