@@ -1,0 +1,77 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 0,
+    "passes": 0,
+    "pending": 0,
+    "failures": 0,
+    "start": "2019-04-21T16:28:13.567Z",
+    "end": "2019-04-21T16:28:13.567Z",
+    "duration": 0,
+    "testsRegistered": 0,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false,
+    "passPercentClass": "warning",
+    "pendingPercentClass": "danger"
+  },
+  "suites": {
+    "uuid": "3b616211-4aa6-46c8-87ab-cd30236e13cf",
+    "tests": [],
+    "suites": [
+      {
+        "uuid": "b5f05c5f-4a0e-4dfd-b54b-6bec6c898e0e",
+        "title": "Login into administration panel",
+        "fullFile": "",
+        "file": "",
+        "beforeHooks": [],
+        "afterHooks": [],
+        "tests": [
+          {
+            "title": "Login is correct",
+            "fullTitle": "Login into administration panel Login is correct",
+            "duration": 0,
+            "state": "passed",
+            "speed": "slow",
+            "pass": true,
+            "fail": false,
+            "pending": false,
+            "code": "",
+            "err": {},
+            "isRoot": false,
+            "uuid": "ceed353c-d173-4fa5-b3c9-3c7e375034d4",
+            "isHook": false,
+            "skipped": false,
+            "context": "{\"title\": \"Detail:\",\"value\": \"http://localhost:5000/ceed353c-d173-4fa5-b3c9-3c7e375034d4\"}"
+          }          
+        ],
+        "suites": [],
+        "passes": [],
+        "failures": [],
+        "pending": [],
+        "skipped": [],
+        "duration": 0,
+        "root": false,
+        "rootEmpty": false,
+        "_timeout": 2000
+      }
+    ],
+    "duration": 0,
+    "root": true,
+    "rootEmpty": true,
+    "title": "",
+    "fullFile": "",
+    "file": "",
+    "beforeHooks": [],
+    "afterHooks": [],
+    "passes": [],
+    "failures": [],
+    "pending": [],
+    "skipped": [],
+    "_timeout": 2000
+  },
+  "copyrightYear": 2019
+}

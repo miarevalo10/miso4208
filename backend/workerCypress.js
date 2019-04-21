@@ -4,6 +4,7 @@ const path = require('path');
 var shell = require('shelljs');
 var AdmZip = require('adm-zip');
 let db = require('./database');
+const uuidv1 = require('uuid/v1')
 
 AWS.config.update({ region: 'us-west-2' });
 var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
@@ -13,10 +14,14 @@ const basePath = './cypress/'
 const cypressConfig = '/cypress.json'
 const FEATURE_TOKEN = "Feature:"
 const URL_FRONT = 'http://localhost:5000/'
-const SCREENSHOTS_FOLDER = './cypress/screenshots/'
+const SCREENSHOTS_FOLDER = basePath + 'screenshots/'
+const REPORTS = 'reports/'
+const REPORTS_FOLDER = basePath + REPORTS
+const HTML_REPORTS_FOLDER = REPORTS_FOLDER + 'html/'
 const BUCKET_NAME = 'pruebas-autom'
 const FOLDER_S3 = 'cypress/'
 const URL_S3 = 'https://s3-us-west-2.amazonaws.com/' + BUCKET_NAME + "/"
+const FILENAME_REPORT = 'index.html'
 
 var params = {
   QueueUrl: process.env.SQS_CYPRESS
@@ -62,29 +67,6 @@ function deleteMessage() {
   });
 }
 
-var t = setInterval(rcvMsg, 2000);
-
-function unzipFile(data) {
-  const filePath = basePath + data.testingSet
-  var zip = new AdmZip(filePath);
-  zip.extractAllTo(basePath, true);
-}
-
-function runTestingSet(data) {
-  shell.cd(basePath + data.project)
-  shell.exec('npm i')
-  addReportConfiguration(data)
-  replaceCypressCucumbreLibrary()
-  shell.exec('rm -r cypress/results')
-  shell.exec('rm -r cypress/screenshots')
-  shell.exec('npx cypress run .').output
-  changeResultsContextAndFolders('cypress/results/', listFeaturesFiles('cypress/integration/'), data)
-  shell.exec('npx mochawesome-merge --reportDir cypress/results > mochawesome.json')
-  shell.exec('npx mochawesome-report-generator -i  mochawesome.json')
-  updateProcess(data)
-  deleteMessage()
-}
-
 const downloadFile = (data) => {
   console.log('data', data);
   var params = {
@@ -106,6 +88,46 @@ const downloadFile = (data) => {
       runTestingSet(data)
     }
   })
+}
+
+var t = setInterval(rcvMsg, 2000);
+
+function unzipFile(data) {
+  const filePath = basePath + data.testingSet
+  let projectPath = filePath.replace(".zip", "")
+  if (fs.existsSync(projectPath)) {
+    shell.exec('rm -r ' + projectPath)
+  }
+  var zip = new AdmZip(filePath);
+  zip.extractAllTo(basePath, true);
+}
+
+function runTestingSet(data) {
+  shell.cd(basePath + data.project)
+  shell.exec('npm i')
+  addReportConfiguration(data)
+  replaceCypressCucumbreLibrary()
+  //cleanProject()
+  shell.exec('npx cypress run .').output
+  shell.exec('rsync -a --delete ./cypress/results/ ./cypress/results_db/')
+  changeResultsContextAndFolders('cypress/results/', listFeaturesFiles('cypress/integration/'), data)
+  changeResultsContextAndFolders('cypress/results_db/', listFeaturesFiles('cypress/integration/'), data, true)
+  shell.exec('npx mochawesome-merge --reportDir cypress/results > mochawesome.json')
+  shell.exec('npx mochawesome-merge --reportDir cypress/results_db > mochawesome_db.json')
+  shell.exec('npx mochawesome-report-generator -i mochawesome.json -f ' + FILENAME_REPORT + ' -o ' + REPORTS)
+  uploadFileToS3(REPORTS + FILENAME_REPORT, s3Path(data) + REPORTS, "text/html");
+  updateProcess(data)
+  deleteMessage()
+}
+
+function cleanProject() {
+  shell.exec('rm -r cypress/results')
+  shell.exec('rm -r cypress/results_db')
+  shell.exec('rm -r ' + SCREENSHOTS_FOLDER)
+  shell.exec('rm -r ' + REPORTS_FOLDER)
+  shell.exec('rm -r mochawesome-report')
+  shell.exec('rm mochawesome_db.json')
+  shell.exec('rm mochawesome.json')
 }
 
 function addReportConfiguration(data) {
@@ -143,56 +165,86 @@ function listFeaturesFiles(dir) {
   return lstFiles;
 }
 
-function changeResultsContextAndFolders(dir, lstFiles, data) {
+function changeResultsContextAndFolders(dir, lstFiles, data, includeDetail = false) {
   const files = fs.readdirSync(dir);
   for (const file of files) {
     let content = fs.readFileSync(dir + file)
     let result = JSON.parse(content)
     let feature = result.suites.suites[0]
     let baseDir = SCREENSHOTS_FOLDER + lstFiles[feature.title]
-    if (fs.existsSync(baseDir)) {
-      fs.renameSync(baseDir, SCREENSHOTS_FOLDER + feature.uuid)
-      baseDir = SCREENSHOTS_FOLDER + feature.uuid
-  }
-  for (let test of feature.tests) {
-      test.context = '{\"title\": \"Detail:\",\"value\": \"' + URL_FRONT + test.uuid + '\"}'
+    for (let test of feature.tests) {
+      let s3basePath = s3Path(data)
+      let s3ReportsHTMLPath = s3basePath + HTML_REPORTS_FOLDER.replace(basePath, "")
+
+      test.context = '{\"title\": \"Detail\",\"value\": \"' + URL_S3 + s3ReportsHTMLPath + test.uuid + '.html' + '\"}'
       let testFolder = baseDir + "/" + test.title + "/"
-      if (fs.existsSync(testFolder)) {
-          const scrsFiles = fs.readdirSync(testFolder);
-          let s3Path = FOLDER_S3 + data.projectId + "/process/" + data.processId + "/" + testFolder.replace(SCREENSHOTS_FOLDER, "")
-          let detail = test.detail
-          if (!detail) detail = []
-          for (const scrsFile of scrsFiles) {
-              var step = { order: scrsFile.substr(0, 3), name: scrsFile.substr(3, scrsFile.length), screenshot: URL_S3 + s3Path + scrsFile }
-              detail.push(step)
-              uploadScreenshotStep(testFolder + scrsFile, s3Path, test)
-          }
-          test.detail = detail
+      if (includeDetail && fs.existsSync(testFolder)) {
+        if (!fs.existsSync(REPORTS_FOLDER)) {
+          fs.mkdirSync(REPORTS_FOLDER);
+        }
+        let jsonTest = REPORTS_FOLDER + test.uuid + '.json'
+        shell.exec('cp ./../../template_files/mochawesome.json ' + jsonTest)
+        let contentTest = fs.readFileSync(jsonTest)
+        let resultTest = JSON.parse(contentTest)
+        let testInfo = resultTest.suites.suites[0]
+        testInfo.title = test.title
+        testInfo.duration = test.duration
+
+        let stepTemplate = JSON.stringify(testInfo.tests[0]);
+        testInfo.tests = []
+
+        const scrsFiles = fs.readdirSync(testFolder);
+        let s3ScreenshotsPath = s3basePath + testFolder.replace(basePath, "")
+        let detail = test.detail
+        if (!detail) detail = []
+        for (const scrsFile of scrsFiles) {
+          var step = { order: scrsFile.substr(0, 3), name: scrsFile.substr(3, scrsFile.length), screenshot: URL_S3 + s3ScreenshotsPath + scrsFile }
+          detail.push(step)
+          uploadFileToS3(testFolder + scrsFile, s3ScreenshotsPath, "image/png")
+
+          let stepInfo = JSON.parse(stepTemplate)
+          stepInfo.title = step.name
+          stepInfo.fullTitle = step.name
+          stepInfo.uuid = uuidv1()
+          stepInfo.context = '{\"title\": \"Screenshot\",\"value\": \"' + step.screenshot + '\"}'
+          testInfo.tests.push(stepInfo)
+        }
+        test.detail = detail
+        fs.writeFileSync(jsonTest, JSON.stringify(resultTest, null, 4))
+        shell.exec('npx mochawesome-report-generator -i ' + jsonTest + ' -o ' + HTML_REPORTS_FOLDER)
+        uploadFileToS3(HTML_REPORTS_FOLDER + test.uuid + '.html', s3ReportsHTMLPath, "text/html")
       }
-  }
-  fs.writeFileSync(dir + file, JSON.stringify(result, null, 4))
+    }
+    fs.writeFileSync(dir + file, JSON.stringify(result, null, 4))
   }
 }
 
+function s3Path(data) {
+  return FOLDER_S3 + data.projectId + "/process/" + data.processId + "/"
+}
+
 function updateProcess(data) {
-  let content = fs.readFileSync('mochawesome.json')
+  let content = fs.readFileSync('mochawesome_db.json')
   let result = JSON.parse(content)
 
   let process = db.getProcess(data.projectId, data.processId)
   process.child('result').set(result)
+  process.child('report').set(URL_S3 + s3Path(data) + REPORTS_FOLDER.replace(basePath, "") + 'index.html')
   process.update({ state: "Terminated" })
 }
 
-function uploadScreenshotStep(filePath, s3Path, test) {
+function uploadFileToS3(filePath, s3Path, contentType) {
   var fileName = path.basename(filePath)
   var params = {
       Bucket: BUCKET_NAME,
       Body: fs.createReadStream(filePath),
-      Key: s3Path + fileName
+      Key: s3Path + fileName,
+      ContentType: contentType,
+      ACL: 'public-read'
   };
 
   s3.upload(params, function (err, data) {
-      if (err) console.log("Error", err);
+      if (err) console.error("Error", err);
   });
 }
 //downloadFile({projectId: '-LbQxpuXbI9dVHD83BjD', processId:'-LbQz51NGkxz15rhwLAU', testingSet: 'cucumber-cypress.zip', project: 'cucumber-cypress'});
