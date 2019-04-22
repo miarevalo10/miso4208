@@ -4,8 +4,6 @@ seedrandom(Cypress.env('seed'), { global: true });
 
 describe("Site under monkeys' events", function () {
     it("Visit site and survives monkeys' events", function () {
-        cy.log("seed: "+Cypress.env('seed'))
-        cy.log("events: "+Cypress.env('events'))
         cy.visit(Cypress.config().baseUrl);
         takeScreenshot()
         cy.wait(1000);
