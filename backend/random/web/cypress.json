@@ -1,4 +1,8 @@
 {
     "baseUrl": "https://www.eltiempo.com",
-    "video": false
+    "video": false,
+    "env": {
+        "events": 10,
+        "seed": 1234
+    }
 }
