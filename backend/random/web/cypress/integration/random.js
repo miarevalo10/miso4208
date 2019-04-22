@@ -1,14 +1,15 @@
 const seedrandom = require('seedrandom');
 var screenshotIndex = 1
-var seed = 123
-seedrandom(seed, { global: true });
+seedrandom(Cypress.env('seed'), { global: true });
 
 describe("Site under monkeys' events", function () {
     it("Visit site and survives monkeys' events", function () {
+        cy.log("seed: "+Cypress.env('seed'))
+        cy.log("events: "+Cypress.env('events'))
         cy.visit(Cypress.config().baseUrl);
         takeScreenshot()
         cy.wait(1000);
-        randomEvent(10);
+        randomEvent(Cypress.env('events'));
     })
 })
 
