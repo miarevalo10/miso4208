@@ -1,4 +1,4 @@
-var appUrl = 'http://localhost:8888/index.php/admin/index';
+var appUrl = 'http://ec2-3-87-196-16.compute-1.amazonaws.com/index.php/admin/authentication/sa/login';
 var nombreEncuesta = 'Encuesta Pruebas E2E'
 var nombreGrupo = "Grupo 1"
 
