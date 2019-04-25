@@ -14,8 +14,8 @@ export default class CreateApplication extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            'applicationName': '',
-            'applicationType': 'Web',
+            'name': '',
+            'type': 'Web',
             'applicationArchitecture': 'MVP',
             'applicationLanguage': 'Java',
             'applicationVersion': '',
@@ -112,8 +112,8 @@ export default class CreateApplication extends Component {
         e.preventDefault();
         console.log(this.state);
         axios.post("http://localhost:3001/applications/create", {
-            applicationName: this.state.applicationName,
-            applicationType: this.state.applicationType,
+            name: this.state.name,
+            type: this.state.type,
             applicationArchitecture:this.state.applicationArchitecture,
             applicationDescription: this.state.applicationDescription,
             applicationLanguage:this.state.applicationLanguage,
@@ -136,12 +136,12 @@ export default class CreateApplication extends Component {
 
 
     renderSupportedPlatforms() {
-        const { applicationType,
+        const { type,
             minSdk,
             maxSdk,
             browserVersion,
             browserName } = this.state;
-        if (applicationType === 'Android') {
+        if (type === 'Android') {
             return (
                 <FormGroup>
                     <Row form>
@@ -187,7 +187,7 @@ export default class CreateApplication extends Component {
                 </FormGroup>
 
             );
-        } else if (applicationType === 'Web') {
+        } else if (type === 'Web') {
             return (
                 <div>
                     <FormGroup>
@@ -288,8 +288,8 @@ export default class CreateApplication extends Component {
     render() {
         console.log(this.state)
         const {
-            applicationName,
-            applicationType,
+            name,
+            type,
             applicationArchitecture,
             applicationLanguage } = this.state;
         return (
@@ -301,9 +301,9 @@ export default class CreateApplication extends Component {
                             <Label>Application name</Label>
                             <Input
                                 type="name"
-                                name="applicationName"
-                                id="applicationName"
-                                value={applicationName}
+                                name="name"
+                                id="name"
+                                value={name}
                                 valid={this.state.validate.nameState === 'has-success'}
                                 invalid={this.state.validate.nameState === 'has-danger'}
                                 onChange={(e) => {
@@ -337,12 +337,12 @@ export default class CreateApplication extends Component {
                     </Col>
                     <Col>
                         <FormGroup>
-                            <Label for="applicationType">Select type of application</Label>
+                            <Label for="type">Select type of application</Label>
                             <Input
                                 type="select"
-                                name="applicationType"
-                                id="applicationType"
-                                value={applicationType}
+                                name="type"
+                                id="type"
+                                value={type}
                                 onChange={(e) => {
                                     this.validateField(e, 'typeState')
                                     this.handleChange(e)

@@ -42,24 +42,28 @@ class Database {
 
   saveApplication(application) {
     const {
-      applicationName,
-      applicationType,
+      name,
+      type,
       applicationArchitecture,
       applicationLanguage,
       applicationDescription,
       minSdk,
       maxSdk,
       supportedBrowsers,
+      process,
+      versions
     } = application;
-    db.ref('applications/').push({
-      applicationName,
-      applicationType,
+    db.ref('projects/').push({
+      name,
+      type,
       applicationArchitecture,
       applicationLanguage,
       applicationDescription,
       minSdk,
       maxSdk,
       supportedBrowsers,
+      process,
+      versions
     });
   }
 
@@ -68,8 +72,8 @@ class Database {
   }
 
   getApplications(callback) {
-    return db.ref('applications/').once('value').then((snapshot) => {
-      callback(snapshot.val())
+    return db.ref('projects/').once('value').then((snapshot) => {
+      callback(snapshot)
     });
   }
 }

@@ -11,16 +11,16 @@ router.use(function timeLog(req, res, next) {
 router.get('/', function (req, res) {
     console.log("get all applications");
     db.getApplications((data)=>{
-        console.log(data)
-        return res.status(200).send(data);
+        console.log(data.val())
+        return res.status(200).send(data.val());
     });
 });
 
 router.post("/create", (req, res) => {
     console.log('sendtest', req.body);
     const {
-        applicationName,
-        applicationType,
+        name,
+        type,
         applicationArchitecture,
         applicationLanguage,
         applicationDescription,
@@ -29,13 +29,16 @@ router.post("/create", (req, res) => {
         supportedBrowsers,
     } = req.body;
 
+    const process = [];
+    const versions = [];
+
     var application = {};
     var err = '';
     code_check: {
-        if (isEmpty(applicationName)) {
+        if (isEmpty(name)) {
             err = 'Application name is empty';
             break code_check;
-        } else if (isEmpty(applicationType)) {
+        } else if (isEmpty(type)) {
             err = 'Application type is empty';
             break code_check;
         } else if (isEmpty(applicationArchitecture)) {
@@ -49,14 +52,16 @@ router.post("/create", (req, res) => {
 
     if (err === '') {
         application = {
-            applicationName,
-            applicationType,
+            name,
+            type,
             applicationArchitecture,
             applicationLanguage,
             applicationDescription,
             minSdk,
             maxSdk,
             supportedBrowsers,
+            process,
+            versions
         }
         db.saveApplication(application, (error) => {
             if(error){

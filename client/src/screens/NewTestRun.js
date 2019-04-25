@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import axios from "axios";
+import _ from 'lodash';
 
 export default class NewTestRun extends Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
+            app: this.props.application,
             apks: [],
             apkSelected: "",
             testsTypes: [
@@ -57,12 +59,20 @@ export default class NewTestRun extends Component {
     }
 
     renderListApks() {
-        return this.state.apks.slice(1).map((apk) => {
-            var list = apk.Key.split("/")
-            var key = list[1];
-            return <option key={key} value={key}>{key}</option>
-
-        })
+        const {app} = this.state;
+        if(app){
+            return _.map(app.versions, (value, key) => {
+                return <option key={key} value={value.name}>{value.name}</option>
+            });
+        } else {
+            return this.state.apks.slice(1).map((apk) => {
+                var list = apk.Key.split("/")
+                var key = list[1];
+                return <option key={key} value={key}>{key}</option>
+    
+            })
+        }
+        
     }
 
     renderListTechnologies() {
@@ -115,10 +125,10 @@ export default class NewTestRun extends Component {
 
     renderMessage() {
         if (this.state.apkSelected === "") {
-            return <h5>Please select the file you want to test</h5>
+            return <h5>Please select the version you want to test</h5>
         } else {
             return <button className="btn btn-primary" type="submit">I want to run {this.state.technology} testing
-            on the {this.state.apkSelected} file.</button>
+            on the version {this.state.apkSelected}.</button>
 
         }
     }
@@ -153,6 +163,27 @@ export default class NewTestRun extends Component {
     }
 
     render() {
+        var packageAndroid
+        console.log(this.state.app)
+        if (this.state.app && this.state.app.type.toLowerCase() === 'android') {
+            packageAndroid = (
+                <div className="form-group">
+                    <label htmlFor="packageName">Package name</label>
+                    <div className="input-group">
+                        <input
+                            type="text"
+                            value={this.state.value}
+                            onChange={this.handleChange}
+                            className="form-control"
+                            id="packageName"
+                            required />
+                        <div className="invalid-feedback">
+                            Please provide a package name
+                </div>
+                    </div>
+                </div>
+            );
+        }
         return (
             <div className="container-fluid border border-primary">
 
@@ -160,7 +191,7 @@ export default class NewTestRun extends Component {
                 <br /><br />
                 <form onSubmit={this.handleSubmit}>
                     <div className="form-group">
-                        <h4>Apk to be tested</h4>
+                        <h4>Version to be tested</h4>
                         <select
                             multiple
                             onChange={this.onOptionChanged}
@@ -168,30 +199,16 @@ export default class NewTestRun extends Component {
                             {this.renderListApks()}
                         </select>
                     </div>
-                    <div className="form-group">
-                        <label htmlFor="packageName">Package name</label>
-                        <div className="input-group">
-                            <input
-                                type="text"
-                                value={this.state.value}
-                                onChange={this.handleChange}
-                                className="form-control"
-                                id="packageName"
-                                required />
-                            <div className="invalid-feedback">
-                                Please provide a package name
-                            </div>
-                        </div>
-                    </div>
+                    {packageAndroid}
                     <div className="input-group">
                         <label htmlFor="techonology">Technology</label>
                         <div className="input-group">
-                        <select
-                            id="techonology"
-                            onChange={this.onTechnologyOptionChanged}
-                            className="form-control">
-                            {this.renderListTechnologies()}
-                        </select>
+                            <select
+                                id="techonology"
+                                onChange={this.onTechnologyOptionChanged}
+                                className="form-control">
+                                {this.renderListTechnologies()}
+                            </select>
                         </div>
 
                     </div>
