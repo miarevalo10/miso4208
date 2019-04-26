@@ -50,10 +50,9 @@ class Database {
       minSdk,
       maxSdk,
       supportedBrowsers,
-      process,
-      versions
+      process
     } = application;
-    return db.ref('projects/').push({
+    const ref = db.ref('projects/').push({
       name,
       type,
       applicationArchitecture,
@@ -62,9 +61,31 @@ class Database {
       minSdk,
       maxSdk,
       supportedBrowsers,
-      process,
-      versions
+      process
     });
+    return ref.key;
+  }
+
+  saveVersion(projectId,version) {
+    const {
+      apkFile,createdDate,name
+    } = version
+    console.log(`ref version ${projectId}`);
+    return db.ref(`projects/${projectId}/versions`).push({
+      apkFile,createdDate,name
+    });
+  }
+
+  saveProcess(process) {
+    const refPush = `projects/${process.projectId}/versions/${process.versionKey}/process`;
+    console.log(`ruta para push ${refPush}`);
+    const dbProcess = {
+      events: process.events,
+      seed: process.seed,
+      state: 'Sent',
+      type: process.queue
+    }
+    return db.ref(refPush).push(dbProcess).key;
   }
 
   getProcess(projectId, processId) {

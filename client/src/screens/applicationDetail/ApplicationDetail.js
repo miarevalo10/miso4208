@@ -15,9 +15,11 @@ export default class ApplicationDetail extends Component {
         super(props)
         this.state = {
             application: this.props.location.state.application,
+            appKey: this.props.location.state.key,
             collapse: false,
             collapseTwo: false
         }
+        console.log('app key in app detail', this.state.appKey);
     }
 
 
@@ -165,7 +167,7 @@ export default class ApplicationDetail extends Component {
 
                 <Collapse isOpen={this.state.collapse}>
                     <Card>
-                        <NewTestRun application={app} />
+                        <NewTestRun application={app} appKey={this.state.appKey}/>
                     </Card>
                 </Collapse>
 

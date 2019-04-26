@@ -11,7 +11,7 @@ router.use(function timeLog(req, res, next) {
 router.get('/', function (req, res) {
     console.log("get all applications");
     db.getApplications((data)=>{
-        //console.log(data.val())
+        console.log(data.val())
         return res.status(200).send(data.val());
     });
 });
@@ -61,12 +61,15 @@ router.post("/create", (req, res) => {
             minSdk,
             maxSdk,
             supportedBrowsers,
-            process,
-            versions
+            process
         }
         console.log('app to save', application);
-        db.saveApplication(application).then(response => {
+        const projectId = db.saveApplication(application);
+        //const projectId = ref.key();
+        console.log('PROJECT ID', projectId);
+        db.saveVersion(projectId,versions[0]).then(response => {
             //console.log('response en back', response);
+            application.projectId = projectId;
             return res.status(200).send(application);
           }).catch(error => {
             console.log(error)
