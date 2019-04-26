@@ -53,7 +53,7 @@ class Database {
       process,
       versions
     } = application;
-    db.ref('projects/').push({
+    return db.ref('projects/').push({
       name,
       type,
       applicationArchitecture,

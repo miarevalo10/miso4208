@@ -11,13 +11,13 @@ router.use(function timeLog(req, res, next) {
 router.get('/', function (req, res) {
     console.log("get all applications");
     db.getApplications((data)=>{
-        console.log(data.val())
+        //console.log(data.val())
         return res.status(200).send(data.val());
     });
 });
 
 router.post("/create", (req, res) => {
-    console.log('sendtest', req.body);
+    console.log('sendtest reqbody', req.body);
     const {
         name,
         type,
@@ -27,10 +27,11 @@ router.post("/create", (req, res) => {
         minSdk,
         maxSdk,
         supportedBrowsers,
+        versions
     } = req.body;
 
     const process = [];
-    const versions = [];
+    //const versions = [];
 
     var application = {};
     var err = '';
@@ -63,14 +64,16 @@ router.post("/create", (req, res) => {
             process,
             versions
         }
-        db.saveApplication(application, (error) => {
-            if(error){
-                console.log(err);
-                return res.status(400).send(err);
-            } else {
-                return res.status(200).send(application);
-            }
-        })
+        console.log('app to save', application);
+        db.saveApplication(application).then(response => {
+            //console.log('response en back', response);
+            return res.status(200).send(application);
+          }).catch(error => {
+            console.log(error)
+            console.log('error en back', error)
+            return res.status(400).send(error);
+      
+          });
     } else {
         console.log(err);
         return res.status(400).send(err);

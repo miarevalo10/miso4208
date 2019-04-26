@@ -80,10 +80,21 @@ const uploadFile = (buffer, name, type) => {
         ACL: 'public-read',
         Body: buffer,
         Bucket: process.env.S3_BUCKET || "pruebas-autom",
-        ContentType: type.mime,
-        Key: `${name}.${type.ext}`
+        ContentType: type,
+        Key: `${name}`
     };
+    console.log('paramas upload',params);
     return s3.upload(params).promise();
+    // s3.putObject(params, function (err, data) {
+     //   ContentType: type.mime,
+    //     if (err) {
+    //       console.log("Error: ", err);
+    //       return res.redire
+    //     } else {
+    //       console.log(data);
+    //     }
+    //   });
+   // return s3.upload(params).promise();
 };
 
 // Define POST route
@@ -92,13 +103,19 @@ router.post("/apk-upload", (request, response) => {
     form.parse(request, async (error, fields, files) => {
         if (error) throw new Error(error);
         try {
+            console.log('FILESSSS',files)
+            console.log('headers',files.file[0].headers,files.file[0].headers['content-type']);
+
             const path = files.file[0].path;
             const buffer = fs.readFileSync(path);
-            const type = fileType(buffer);
-            const timestamp = Date.now().toString();
-            const fileName = `apks/${timestamp}-lg`;
+            const type = files.file[0].headers['content-type'];
+            //const timestamp = Date.now().toString();
+            const name = files.file[0].originalFilename;
+
+            const fileName = `apks/${name}`;
 
             const data = await uploadFile(buffer, fileName, type);
+
             return response.status(200).send(data);
         } catch (error) {
             console.log(error)

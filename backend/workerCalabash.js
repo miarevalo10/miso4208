@@ -26,13 +26,7 @@ const FOLDER_S3 = 'calabash/';
 *  testingSet: 'car_report_features2.zip', project: 'calabash-android', apkName: 'me.kuehle.carreport_79.apk' }
 */
 
-//var t = setInterval(rcvMsg, 2000);
-rcvMsg();
-rcvMsg();
-rcvMsg();
-rcvMsg();
-rcvMsg();
-rcvMsg();
+var t = setInterval(rcvMsg, 2000);
 
 function rcvMsg() {
   sqs.receiveMessage(params, function (err, data) {

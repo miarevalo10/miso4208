@@ -6,8 +6,10 @@ import {
     Row, InputGroupAddon, InputGroup,
     ListGroup, ListGroupItem
 } from 'reactstrap';
+import { Redirect } from 'react-router-dom';
 
 import axios from "axios";
+import FileUpload from './FileUpload';
 
 export default class CreateApplication extends Component {
 
@@ -25,6 +27,9 @@ export default class CreateApplication extends Component {
             'supportedBrowsers': [],
             'browserVersion': '',
             'browserName': '',
+            'versionName': '',
+            'apkFile' : '',
+            //versions : [{name:'', apkFile:'', createdDate:''}],
             validate: {
                 nameState: '',
                 typeState: '',
@@ -35,6 +40,9 @@ export default class CreateApplication extends Component {
                 browserNameState: '',
                 browserVersionState: '',
             },
+            file: null,
+            success: false,
+            message: ""
         }
         this.handleChange = this.handleChange.bind(this);
         this.isEmpty = this.isEmpty.bind(this);
@@ -108,20 +116,75 @@ export default class CreateApplication extends Component {
         });
     }
 
+    submitFile = () => {
+        //event.preventDefault();
+        const formData = new FormData();
+        //                'Content-Type': 'multipart/form-data'
+
+        formData.append('file', this.state.file[0]);
+        formData.append('timestamp', new Date())
+        axios.post("http://localhost:3001/api/apk-upload", formData, {
+            headers: {
+                'Content-Type': 'application/apk'
+            }
+        }).then(response => {
+            console.log('res fileupload', response)
+
+            this.setState({
+                success: true,
+                message: "File upload succesfully"
+            });
+        }).catch(error => {
+            console.log(error)
+            this.setState({
+                success: true,
+                message: error.message
+            });
+        });
+    }
+
+    handleFileUpload = (event) => {
+        this.setState({ file: event.target.files });
+        this.setState({ apkFile: event.target.files[0].name})
+        console.log('handle file upload', this.state.file, 'event', event.target.files[0]);
+
+    }
+
     submitForm(e) {
         e.preventDefault();
         console.log(this.state);
+        this.submitFile();
+        const versionsObj = [{name: this.state.versionName, apkFile: this.state.apkFile, createdDate: new Date()}];
         axios.post("http://localhost:3001/applications/create", {
             name: this.state.name,
             type: this.state.type,
-            applicationArchitecture:this.state.applicationArchitecture,
+            applicationArchitecture: this.state.applicationArchitecture,
             applicationDescription: this.state.applicationDescription,
-            applicationLanguage:this.state.applicationLanguage,
-            minSdk:this.state.minSdk,
-            maxSdk:this.state.maxSdk,
-            supportedBrowsers:this.state.supportedBrowsers
+            applicationLanguage: this.state.applicationLanguage,
+            minSdk: this.state.minSdk,
+            maxSdk: this.state.maxSdk,
+            supportedBrowsers: this.state.supportedBrowsers,
+            versions: versionsObj
+        }).then(response => {
+            console.log('responseee', response)
+            this.setState({
+                success: true,
+                message: "Application uploaded succesfully"
+            });
+            this.renderRedirect();
+        }).catch(error => {
+            console.log(error)
+            console.log('rerror', error)
+            this.setState({
+                success: true,
+                message: error.message
+            });
         });
     }
+
+    renderRedirect = () => {
+          return <Redirect to="/sendmessage" />
+      }
 
     renderSupportedBrowsers = () => {
         const { supportedBrowsers } = this.state
@@ -177,6 +240,22 @@ export default class CreateApplication extends Component {
                                     this.validateSdk(e, 'sdkState')
                                 }} />
                         </Col>
+                        <Col md={2}>
+                            <Label for="exampleZip">Version name</Label>
+                            <Input
+                                name="versionName"
+                                id="exampleZip"
+                                valid={this.state.validate.versionState === 'has-success'}
+                                invalid={this.state.validate.versionState === 'has-danger'}
+                                onChange={(e) => {
+                                    this.handleChange(e)
+                                    this.validateSdk(e, 'versionState')
+                                }} />
+                        </Col>
+                        <Col md={4}>
+                        <Label for="exampleZip">Upload apk </Label>
+                            <input label='upload file' type='file' onChange={this.handleFileUpload} />
+                        </Col>
                         <FormFeedback valid>
                             Valid range
                     </FormFeedback>
@@ -185,6 +264,7 @@ export default class CreateApplication extends Component {
                     </FormFeedback>
                     </Row>
                 </FormGroup>
+
 
             );
         } else if (type === 'Web') {
@@ -272,6 +352,7 @@ export default class CreateApplication extends Component {
                                     this.validateSdk(e, 'sdkState')
                                 }} />
                         </Col>
+
                         <FormFeedback valid>
                             Valid range
                     </FormFeedback>
@@ -322,18 +403,18 @@ export default class CreateApplication extends Component {
                         </FormGroup>
                     </Col>
                     <Col>
-                    <FormGroup>
-                        <Label for="applicationDescription">Description</Label>
-                        <Input 
-                        type="textarea" 
-                        name="applicationDescription" 
-                        id="applicationDescription"
-                        onChange={(e) => {
-                            this.handleChange(e)
-                        }}
-                        maxLength="300" />
-                        <FormText>The description can be empty. 300 max.</FormText>
-                    </FormGroup>
+                        <FormGroup>
+                            <Label for="applicationDescription">Description</Label>
+                            <Input
+                                type="textarea"
+                                name="applicationDescription"
+                                id="applicationDescription"
+                                onChange={(e) => {
+                                    this.handleChange(e)
+                                }}
+                                maxLength="300" />
+                            <FormText>The description can be empty. 300 max.</FormText>
+                        </FormGroup>
                     </Col>
                     <Col>
                         <FormGroup>
