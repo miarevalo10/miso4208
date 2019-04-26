@@ -16,7 +16,7 @@ var params = {
 
 var receiptHandle = "";
 const basePath = './apks/';
-
+var testObj = {};
 
 const rcvMsg = () => {
   sqs.receiveMessage(params, function (err, data) {
@@ -26,7 +26,9 @@ const rcvMsg = () => {
         var test = data.Messages[0].Body;
         console.log('msg rcv', JSON.parse(test));
         receiptHandle = data.Messages[0].ReceiptHandle;
-        downloadFile( JSON.parse(test));
+        testObj = JSON.parse(test);
+        db.updateProcess(testObj.projectId,testObj.versionId,testObj.processId,'In progress');
+        downloadFile( testObj);
 
       } else {
         console.log('no new msgs');
@@ -65,19 +67,13 @@ function runMonkeyTest(events, packageName, apkName) {
   const seedRandom = getRandomInt(1, 100000);
   shell.exec(adb + ' shell monkey -p ' + packageName + ' -s ' + seedRandom + ' -v ' + events );
 
-  let test = new TestModel({
-    timestamp: Date.now(),
-    apkVersion: apkName,
-    seed: seedRandom
-  });
+  // let test = new TestModel({
+  //   timestamp: Date.now(),
+  //   apkVersion: apkName,
+  //   seed: seedRandom
+  // });
 
-  test.save()
-   .then(doc => {
-     console.log('doc saved',doc);
-   })
-   .catch(err => {
-     console.error(err)
-   })
+  db.updateProcess(testObj.projectId,testObj.versionId,testObj.processId,'Finished');
 
   deleteMessage();
 }

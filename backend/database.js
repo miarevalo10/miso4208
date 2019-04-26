@@ -88,8 +88,16 @@ class Database {
     return db.ref(refPush).push(dbProcess).key;
   }
 
-  getProcess(projectId, processId) {
-    return db.ref('projects/' + projectId + "/process/" + processId)
+  updateProcess(projectId,versionId,processId, pstate) {
+    console.log('update process')
+    let processStr = `projects/${projectId}/versions/${versionId}/process/${processId}`;
+    console.log('update process', processStr);
+
+    db.ref().child(processStr).update({'state': pstate, 'lastUpdate': new Date()}).then().catch();
+  }
+
+  getProcess(projectId, versionId, processId) {
+    return db.ref('projects/' + projectId +"/versions/"+versionId+ "/process/" + processId)
   }
 
   getApplications(callback) {
