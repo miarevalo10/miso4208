@@ -1,8 +1,16 @@
 {
-    "baseUrl": "https://www.eltiempo.com",
+    "baseUrl": "https://www.elespectador.com/",
     "video": false,
     "env": {
         "events": 10,
-        "seed": 1234
-    }
+        "seed": 123
+    },
+    "reporter" : "mochawesome",
+    "reporterOptions" : {
+        "reportDir": "cypress/results",
+        "overwrite": false,
+        "html": false,
+        "json": true
+    },
+    "chromeWebSecurity": false
 }

@@ -1,13 +1,19 @@
 const seedrandom = require('seedrandom');
 var screenshotIndex = 1
+var eventsJson = []
 seedrandom(Cypress.env('seed'), { global: true });
 
 describe("Site under monkeys' events", function () {
     it("Visit site and survives monkeys' events", function () {
         cy.visit(Cypress.config().baseUrl);
-        takeScreenshot()
+        takeScreenshot('Start',Cypress.config().baseUrl)
         cy.wait(1000);
         randomEvent(Cypress.env('events'));
+    })
+
+    afterEach(function () {
+        var eventsString = JSON.stringify(eventsJson);
+        cy.writeFile("results/events.json", eventsString);
     })
 })
 
@@ -46,7 +52,7 @@ function randomClickLink() {
         var randomLink = $links.get(getRandomInt(0, $links.length));
         if (!Cypress.dom.isHidden(randomLink)) {
             cy.wrap(randomLink).click({ force: true });
-            takeScreenshot()
+            takeScreenshot('Click link', randomLink.outerHTML)
             //cy.wait(1000);
         }
     });
@@ -58,7 +64,7 @@ function randomClickButton() {
         var randomButton = $buttons.get(getRandomInt(0, $buttons.length));
         if (!Cypress.dom.isHidden(randomButton)) {
             cy.wrap(randomButton).click({ force: true });
-            takeScreenshot()
+            takeScreenshot('Click button', randomButton.outerHTML)
         }
     });
 }
@@ -68,7 +74,7 @@ function randomTypeText() {
         var randomInput = $inputs.get(getRandomInt(0, $inputs.length));
         if (!Cypress.dom.isHidden(randomInput)) {
             cy.wrap(randomInput).click({ force: true }).type("Monkey is typing", { force: true });
-            takeScreenshot()
+            takeScreenshot('Fill input', randomInput.outerHTML)
         }
     });
 }
@@ -79,12 +85,13 @@ function randomSelect() {
         if (!Cypress.dom.isHidden(selectRandom) && selectRandom.options.length > 0) {
             var optionRandom = selectRandom.options[getRandomInt(0, selectRandom.options.length)].value;
             cy.wrap(selectRandom).select(optionRandom, { force: true });
-            takeScreenshot()
+            takeScreenshot('Select', selectRandom.outerHTML)
         }
     });
 }
 
-function takeScreenshot() {
+function takeScreenshot(event, element) {
+    addEventToJson(event, element)
     cy.screenshot((screenshotIndex).pad(3));
     screenshotIndex++;
 }
@@ -92,4 +99,12 @@ function takeScreenshot() {
 Number.prototype.pad = function (size) {
     var sign = Math.sign(this) === -1 ? '-' : '';
     return sign + new Array(size).concat([Math.abs(this)]).join('0').slice(-size);
+}
+
+function addEventToJson(event, element){
+    console.log(element)
+    eventsJson.push({"order" : screenshotIndex,
+            "event" : event,
+            "element" : element,
+            "date" : new Date()});
 }
