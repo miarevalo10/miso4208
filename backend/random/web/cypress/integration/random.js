@@ -7,7 +7,7 @@ describe("Site under monkeys' events", function () {
     it("Visit site and survives monkeys' events", function () {
         cy.visit(Cypress.config().baseUrl);
         takeScreenshot('Start',Cypress.config().baseUrl)
-        cy.wait(1000);
+        cy.wait(2000);
         randomEvent(Cypress.env('events'));
     })
 

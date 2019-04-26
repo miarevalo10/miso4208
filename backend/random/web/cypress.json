@@ -5,8 +5,8 @@
         "events": 10,
         "seed": 123
     },
-    "reporter" : "mochawesome",
-    "reporterOptions" : {
+    "reporter": "mochawesome",
+    "reporterOptions": {
         "reportDir": "cypress/results",
         "overwrite": false,
         "html": false,
