@@ -3,9 +3,10 @@ import './App.css';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import Vrtscreen from './screens/vrtscreen.js';
 import Reportscreen from './screens/reportscreen.js';
-import Home from './screens/Homescreen.js';
+import Home from './screens/homescreen.js';
 import NewTestRun from './screens/NewTestRun.js';
 import CreateApplication from './screens/CreateApplication.js';
+import ApplicationDetail from './screens/applicationDetail/ApplicationDetail';
 
 
 class App extends Component {
@@ -38,8 +39,10 @@ class App extends Component {
           </div>
         </nav>
         <br />
+        
         <Route exact path="/" component={Vrtscreen} />
         <Route path="/about" component={Reportscreen} />
+        <Route path="/details" component={ApplicationDetail} />
         <Route path="/sendmessage" component={Home} />
         <Route path="/topics" component={Topics} />
         <Route path="/new-test" component={NewTestRun} />
