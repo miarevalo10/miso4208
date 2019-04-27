@@ -44,7 +44,7 @@ class App extends Component {
           <Collapse isOpen={this.state.isOpen} navbar>
             <Nav className="ml-auto" navbar>
               <NavItem className="nav-item active">
-                <NavLink href="/sendmessage">Home</NavLink>
+                <NavLink href="/">All applications</NavLink>
               </NavItem >
               <NavItem className="nav-item active">
                 <NavLink href="/create-application">Create application</NavLink>
@@ -53,6 +53,7 @@ class App extends Component {
           </Collapse>
         </Navbar>
         <br />
+
 
         <Route exact path="/" component={Home} />
         <Route path="/about" component={Reportscreen} />
@@ -67,3 +68,4 @@ class App extends Component {
 }
 
 export default App;
+
