@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {
-    Container, Form,
+    Container, Form, Alert,
     FormGroup, Label, Input,
     Button, FormText, FormFeedback,
 } from 'reactstrap';
@@ -22,8 +22,14 @@ export default class AddNewVersion extends Component {
                 typeState: '',
             },
             success: false,
-            message: ""
+            message: "",
+            visible: false,
         }
+        this.onDismiss = this.onDismiss.bind(this);
+    }
+  
+    onDismiss() {
+      this.setState({ visible: false });
     }
 
     submitFile = () => {
@@ -109,6 +115,10 @@ export default class AddNewVersion extends Component {
     submitApk = (event) => {
         event.preventDefault()
         if(this.state.application.type.toLowerCase() !== "web"){
+            if(this.state.file === null){
+                this.setState({visible:true});
+                return;
+            }
             const formData = new FormData();
             formData.append('file', this.state.file[0]);
             formData.append('timestamp', new Date())
@@ -158,6 +168,9 @@ export default class AddNewVersion extends Component {
                 <h1>Add new version</h1>
                 <br />
                 <br />
+                <Alert color="warning" isOpen={this.state.visible} toggle={this.onDismiss}>
+                    You have to upload a file!
+                </Alert>
                 <Form >
                     <FormGroup>
                         <Label for="exampleZip">Version name</Label>

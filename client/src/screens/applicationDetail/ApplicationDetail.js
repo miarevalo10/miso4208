@@ -3,7 +3,7 @@ import {
     ListGroup, ListGroupItem, Container,
     Badge, ListGroupItemHeading, ListGroupItemText,
     Collapse, Button, Card,
-    Row, Input, Label
+    Row,
 } from 'reactstrap';
 import _ from 'lodash';
 import NewTestRun from '../NewTestRun';
@@ -173,7 +173,7 @@ export default class ApplicationDetail extends Component {
                 return _.map(process, (value, key) => {
                     if (value.type && (value.type.toLowerCase() === 'random'||value.type.toLowerCase() === 'monkey')) {
                         return this.renderMonkey(value, key,version)
-                    } else if (value.type && value.type.toLowerCase() === 'bdt' || value.type.toLowerCase() === 'calabash') {
+                    } else if (value.type && (value.type.toLowerCase() === 'bdt' || value.type.toLowerCase() === 'calabash')) {
                         return this.renderBDT(value, key)
                     } else {
                         var stateHTML

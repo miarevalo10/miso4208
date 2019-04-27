@@ -54,7 +54,7 @@ class ReportDetail extends Component {
 
     renderHTMLReport = () => {
         const { report } = this.state.process;
-        if (report) {
+        if (report && report.endsWith("html")) {
             return <div>
                 <h3>Report</h3>
                 <br/>
@@ -63,6 +63,8 @@ class ReportDetail extends Component {
                 src={report}
             />
                 </div>
+        } else if(report){
+            return <a href={report} download>Download report</a>
         }
     }
 
