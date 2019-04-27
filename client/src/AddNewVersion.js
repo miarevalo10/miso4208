@@ -1,12 +1,9 @@
 import React, { Component } from 'react';
 import {
-    Container, Col, Form,
+    Container, Form,
     FormGroup, Label, Input,
     Button, FormText, FormFeedback,
-    Row, InputGroupAddon, InputGroup,
-    ListGroup, ListGroupItem
 } from 'reactstrap';
-import { Redirect } from 'react-router-dom';
 import axios from "axios";
 
 export default class AddNewVersion extends Component {

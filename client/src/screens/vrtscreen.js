@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
 import axios from "axios";
 import {
-    Container, Col, Form,
+    Container, Form,
     FormGroup, Label, Input,
-    Button, FormText, FormFeedback,
-    Row, InputGroupAddon, InputGroup,
-    ListGroup, ListGroupItem,  Collapse
+    Button, Collapse
 } from 'reactstrap';
 import _ from 'lodash';
 

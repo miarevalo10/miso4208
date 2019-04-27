@@ -6,7 +6,6 @@ import {
     Row, Input, Label
 } from 'reactstrap';
 import _ from 'lodash';
-import ScriptUpload from '../ScriptUpload';
 import NewTestRun from '../NewTestRun';
 import { Link } from "react-router-dom";
 import axios from "axios";
