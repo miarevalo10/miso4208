@@ -364,8 +364,8 @@ export default class ApplicationDetail extends Component {
 
                 <Collapse isOpen={this.state.collapseTwo}>
                     <Card>
-                         {/*<AddNewVersion application={app} appKey={this.state.appKey} /> */}
-                         
+                         <AddNewVersion application={app} appKey={this.state.appKey} /> 
+                         {/*
                             Version Name
                             <Input
                                 name="versionName"
@@ -376,7 +376,7 @@ export default class ApplicationDetail extends Component {
                         <Label for="exampleZip">Upload apk </Label>
                             <input label='upload file' type='file' onChange={this.handleApkUpload} />
                         <button className="btn btn-primary" onClick={this.submitApk} >Upload</button>
-                            
+                            */}
                     </Card>
                 </Collapse>
 

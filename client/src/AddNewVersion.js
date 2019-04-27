@@ -53,6 +53,16 @@ export default class AddNewVersion extends Component {
         });
     }
 
+    handleChange = async (event) => {
+        const { target } = event;
+        const value = target.type === 'checkbox' ? target.checked : target.value;
+        const { name } = target;
+        console.log("name: " + name + ", value: " + value);
+        await this.setState({
+            [name]: value,
+        });
+    }
+
     handleFileUpload = (event) => {
         this.setState({ file: event.target.files });
         this.setState({ apkFile: event.target.files[0].name })
@@ -97,28 +107,31 @@ export default class AddNewVersion extends Component {
     }
 
     submitApk = (event) => {
-        const formData = new FormData();
-
-        formData.append('file', this.state.file[0]);
-        formData.append('timestamp', new Date())
-        axios.post("http://localhost:3001/api/apk-upload", formData, {
-            headers: {
-                'Content-Type': 'application/apk'
-            }
-        }).then(response => {
-            console.log('res fileupload', response)
-
-            this.setState({
-                success: true,
-                message: "File upload succesfully"
+        event.preventDefault()
+        if(this.state.application.type.toLowerCase() !== "web"){
+            const formData = new FormData();
+            formData.append('file', this.state.file[0]);
+            formData.append('timestamp', new Date())
+            axios.post("http://localhost:3001/api/apk-upload", formData, {
+                headers: {
+                    'Content-Type': 'application/apk'
+                }
+            }).then(response => {
+                console.log('res fileupload', response)
+    
+                this.setState({
+                    success: true,
+                    message: "File upload succesfully"
+                });
+            }).catch(error => {
+                console.log(error)
+                this.setState({
+                    success: true,
+                    message: error.message
+                });
             });
-        }).catch(error => {
-            console.log(error)
-            this.setState({
-                success: true,
-                message: error.message
-            });
-        });
+        }
+        
 
         const versionToAdd = {
             projectId : this.state.appKey,
@@ -155,6 +168,7 @@ export default class AddNewVersion extends Component {
                             invalid={this.state.validate.nameState === 'has-danger'}
                             onChange={(e) => {
                                 this.validateName(e)
+                                this.handleChange(e)
                             }} />
                             <FormText color="muted">
                                 It is recomended that you use the version number of the application

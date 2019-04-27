@@ -66,32 +66,38 @@ class Database {
     return ref.key;
   }
 
-  saveVersion(projectId,version) {
+  saveVersion(projectId, version) {
     const {
-      apkFile,createdDate,name
+      apkFile, createdDate, name
     } = version
     console.log(`ref version ${projectId}`);
-    return db.ref(`projects/${projectId}/versions`).push({
-      apkFile,createdDate,name
-    });
+    if (apkFile) {
+      return db.ref(`projects/${projectId}/versions`).push({
+        apkFile, createdDate, name
+      });
+    } else {
+      return db.ref(`projects/${projectId}/versions`).push({
+        createdDate, name
+      });
+    }
   }
 
   saveProcess(process) {
     const refPush = `projects/${process.projectId}/versions/${process.versionKey}/process`;
     console.log(`ruta para push ${refPush}`);
     let dbProcess = {
-      ... process,
+      ...process,
       state: 'Sent',
       type: process.queue
     }
-    if(process.queue === 'Monkey') {
+    if (process.queue === 'Monkey') {
       dbProcess = {
         events: process.events,
         seed: process.seed,
         state: 'Sent',
         type: process.queue
       }
-    } else if(process.queue === 'Calabash') {
+    } else if (process.queue === 'Calabash') {
       dbProcess = {
         file: process.file,
         state: 'Sent',
@@ -101,15 +107,15 @@ class Database {
     return db.ref(refPush).push(dbProcess).key;
   }
 
-  updateProcess(projectId,versionId,processId, pstate) {
+  updateProcess(projectId, versionId, processId, pstate) {
     let processStr = `projects/${projectId}/versions/${versionId}/process/${processId}`;
     console.log('update process', processStr);
 
-    db.ref().child(processStr).update({'state': pstate, 'lastUpdate': new Date()}).then().catch();
+    db.ref().child(processStr).update({ 'state': pstate, 'lastUpdate': new Date() }).then().catch();
   }
 
   getProcess(projectId, versionId, processId) {
-    return db.ref('projects/' + projectId +"/versions/"+versionId+ "/process/" + processId)
+    return db.ref('projects/' + projectId + "/versions/" + versionId + "/process/" + processId)
   }
 
   getApplications(callback) {
