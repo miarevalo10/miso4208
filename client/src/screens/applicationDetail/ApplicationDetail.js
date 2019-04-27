@@ -115,24 +115,25 @@ export default class ApplicationDetail extends Component {
     }
 
     renderBDT = (process, key) => {
-        var report = <Link to={{
-                pathname: '/process-details',
-                state: {
-                    appKey: this.state.appKey,
-                    process: process,
-                    processKey: key
-                }
-            }}>
-                See report
-            </Link>
-        
+        const {state} = process;
+
         var stateHTML
         var color
-        const {state} = process;
         if (state) {
             stateHTML = <span>State: {process.state} </span>
             if(state === "Terminated" || state === "Finished"){
-                color = "success"
+                color = "success";
+                var report = <Link to={{
+                    pathname: '/process-details',
+                    state: {
+                        appKey: this.state.appKey,
+                        process: process,
+                        processKey: key
+                    }
+                }}>
+                    See report
+                </Link>
+        
             } else if (state === "Running" || state === "In progress") {
                 color = "info"
             } else if (state === "Sent"){
@@ -158,7 +159,7 @@ export default class ApplicationDetail extends Component {
             return _.map(process, (value, key) => {
                 if (value.type.toLowerCase() === 'random') {
                     return this.renderMonkey(value, key)
-                } else if (value.type.toLowerCase() === 'bdt') {
+                } else if (value.type.toLowerCase() === 'bdt' || value.type.toLowerCase() === 'calabash') {
                     return this.renderBDT(value, key)
                 } else {
                     return <ListGroupItem key={key}>
@@ -173,7 +174,7 @@ export default class ApplicationDetail extends Component {
                 return _.map(process, (value, key) => {
                     if (value.type && (value.type.toLowerCase() === 'random'||value.type.toLowerCase() === 'monkey')) {
                         return this.renderMonkey(value, key,version)
-                    } else if (value.type && value.type.toLowerCase() === 'bdt') {
+                    } else if (value.type && value.type.toLowerCase() === 'bdt' || value.type.toLowerCase() === 'calabash') {
                         return this.renderBDT(value, key)
                     } else {
                         var stateHTML
