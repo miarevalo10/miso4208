@@ -41,6 +41,8 @@ var receiptHandle = "";
  }
  */
 
+var t = setInterval(rcvMsg, 2000);
+
 const rcvMsg = () => {
   sqs.receiveMessage(params, function (err, data) {
     if (err) console.log(err, err.stack);
