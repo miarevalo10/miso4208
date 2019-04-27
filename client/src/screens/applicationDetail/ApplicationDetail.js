@@ -3,12 +3,13 @@ import {
     ListGroup, ListGroupItem, Container,
     Badge, ListGroupItemHeading, ListGroupItemText,
     Collapse, Button, Card,
-    Row
+    Row, Input, Label
 } from 'reactstrap';
 import _ from 'lodash';
 import ScriptUpload from '../ScriptUpload';
 import NewTestRun from '../NewTestRun';
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 
 export default class ApplicationDetail extends Component {
@@ -20,7 +21,6 @@ export default class ApplicationDetail extends Component {
             collapse: false,
             collapseTwo: false
         }
-        console.log('app key in app detail', this.state.appKey);
     }
 
 
@@ -42,7 +42,7 @@ export default class ApplicationDetail extends Component {
     }
 
     componentDidMount() {
-        console.log("componbent mounted");
+        console.log("component mounted");
     }
 
     renderMonkey = (process, key,version) => {
@@ -191,6 +191,66 @@ export default class ApplicationDetail extends Component {
         )
     }
 
+    handleChange = async (event) => {
+        const { target } = event;
+        const value = target.type === 'checkbox' ? target.checked : target.value;
+        const { name } = target;
+        console.log("name: " + name + ", value: " + value);
+        await this.setState({
+            [name]: value,
+        });
+    }
+
+    handleApkUpload = (event) => {
+        this.setState({ file: event.target.files });
+        this.setState({ apkFile: event.target.files[0].name})
+        console.log('handle file upload', this.state.file, 'event', event.target.files[0]);
+    }
+
+    submitApk = () => {
+        const formData = new FormData();
+
+        formData.append('file', this.state.file[0]);
+        formData.append('timestamp', new Date())
+        axios.post("http://localhost:3001/api/apk-upload", formData, {
+            headers: {
+                'Content-Type': 'application/apk'
+            }
+        }).then(response => {
+            console.log('res fileupload', response)
+
+            this.setState({
+                success: true,
+                message: "File upload succesfully"
+            });
+        }).catch(error => {
+            console.log(error)
+            this.setState({
+                success: true,
+                message: error.message
+            });
+        });
+
+        const versionToAdd = {
+            projectId : this.state.appKey,
+            version: {
+                apkFile: this.state.apkFile,
+                createdDate: new Date(),
+                name: this.state.versionName
+            }
+        }
+        axios.post("http://localhost:3001/applications/addVersion", versionToAdd)
+        .then(response => {
+            console.log('Version added', response)
+            alert('Version added');
+            
+        }).catch(error => {
+            console.log(error)
+            alert('There was a problem adding the version');
+        });
+    }
+
+
     render() {
         const app = this.state.application;
         var badge
@@ -238,7 +298,18 @@ export default class ApplicationDetail extends Component {
 
                 <Collapse isOpen={this.state.collapseTwo}>
                     <Card>
-                        <ScriptUpload application={app} />
+                        {/* <ScriptUpload application={app} /> */}
+                            Version Name
+                            <Input
+                                name="versionName"
+                                id="exampleZip"
+                                onChange={(e) => {
+                                    this.handleChange(e)
+                                }} />
+                        <Label for="exampleZip">Upload apk </Label>
+                            <input label='upload file' type='file' onChange={this.handleApkUpload} />
+                        <button className="btn btn-primary" onClick={this.submitApk} >Upload</button>
+
                     </Card>
                 </Collapse>
 
