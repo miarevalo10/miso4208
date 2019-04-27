@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from "axios";
 import _ from 'lodash';
+import ScriptUpload from './ScriptUpload';
 
 export default class NewTestRun extends Component {
 
@@ -11,7 +12,7 @@ export default class NewTestRun extends Component {
             appKey: this.props.appKey,
             apks: [],
             apkSelected: "",
-            versionKey:"",
+            versionKey: "",
             testsTypes: [
                 "Monkey",
                 "End2End",
@@ -31,8 +32,8 @@ export default class NewTestRun extends Component {
         console.log('app key in new test run', this.state.appKey)
         console.log('app versions in newtestrun', this.state.app.versions);
         _.map(this.state.app.versions, (value, key) => {
-            
-            console.log('value',value, 'key', key);
+
+            console.log('value', value, 'key', key);
         });
 
     }
@@ -47,7 +48,7 @@ export default class NewTestRun extends Component {
                 if (err) {
                     console.log(err);
                 } else {
-             //       console.log(response.data.Contents);
+                    //       console.log(response.data.Contents);
                     this.setState({ apks: response.data.Contents });
 
                 }
@@ -55,7 +56,7 @@ export default class NewTestRun extends Component {
     };
 
     onOptionChanged = (event) => {
-        console.log('key',event.target.value);
+        console.log('key', event.target.value);
         this.setState({
             apkSelected: this.state.app.versions[event.target.value].apkFile,
             versionKey: event.target.value
@@ -69,8 +70,8 @@ export default class NewTestRun extends Component {
     }
 
     renderListApks() {
-        const {app} = this.state;
-        if(app){
+        const { app } = this.state;
+        if (app) {
             return _.map(app.versions, (value, key) => {
                 return <option key={key} value={key}>{value.name}</option>
             });
@@ -79,10 +80,10 @@ export default class NewTestRun extends Component {
                 var list = apk.Key.split("/")
                 var key = list[1];
                 return <option key={key} value={key}>{key}</option>
-    
+
             })
         }
-        
+
     }
 
     renderListTechnologies() {
@@ -127,10 +128,40 @@ export default class NewTestRun extends Component {
                             </div>
                         </div>
                     </div>);
+            case "Calabash":
+                return (<div className="formGroup">
+                    <input label='upload file' type='file' onChange={this.handleFileUpload} />
+
+
+                </div>);
+
             default:
                 return (<div>
                 </div>);
         }
+    }
+
+    submitFile = () => {
+        const formData = new FormData();
+        formData.append('file', this.state.file[0]);
+        axios.post("http://localhost:3001/api/script-upload", formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        }).then(response => {
+            this.setState({
+                success: true,
+                message: "File upload succesfully"
+            });
+        }).catch(error => {
+            console.log(error);
+            alert("There was an error uploading the file " + error.message)
+        });
+    }
+
+    handleFileUpload = (event) => {
+        this.setState({ file: event.target.files });
+        this.setState({ fileName: event.target.files[0].name });
     }
 
     renderMessage() {
@@ -156,21 +187,42 @@ export default class NewTestRun extends Component {
     }
 
     handleSubmit = (event) => {
-        alert("The test was submitted succesfully!");
         event.preventDefault();
+        this.submitFile();
         if (this.state.apkSelected === "") {
             return;
         }
         console.log(this.state);
 
-        axios.post("http://localhost:3001/api/sendTest", {
-            apkFile: this.state.apkSelected,
-            queue: this.state.technology,
-            packageName: this.state.packageName,
-            events: this.state.events,
-            seed: this.state.seed,
-            projectId: this.state.appKey,
-            versionKey:this.state.versionKey
+        let test = {};
+
+        if (this.state.technology === 'Monkey') {
+            test = {
+                apkFile: this.state.apkSelected,
+                queue: this.state.technology,
+                packageName: this.state.packageName,
+                events: this.state.events,
+                seed: this.state.seed,
+                projectId: this.state.appKey,
+                versionKey: this.state.versionKey,
+                file: this.state.fileName
+            }
+        } else if (this.state.technology === 'Calabash') {
+            test = {
+                apkFile: this.state.apkSelected,
+                queue: this.state.technology,
+                packageName: this.state.packageName,
+                projectId: this.state.appKey,
+                versionKey: this.state.versionKey,
+                file: this.state.fileName
+            }
+        }
+
+        axios.post("http://localhost:3001/api/sendTest", test).then(response => {
+            alert("The test was submitted succesfully!");
+        }).catch(error => {
+            console.log(error)
+            alert("There was an error creating your test");
         });
     }
 
