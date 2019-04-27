@@ -165,6 +165,7 @@ export default class CreateApplication extends Component {
             supportedBrowsers: this.state.supportedBrowsers,
             versions: versionsObj
         }).then(response => {
+            console.log('responseee', response)
             this.setState({
                 success: true,
                 message: "Application uploaded succesfully"

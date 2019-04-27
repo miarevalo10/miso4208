@@ -93,27 +93,52 @@ export default class AddNewVersion extends Component {
         return (!str || 0 === str.length);
     }
 
-    submitForm = (e) => {
-        const versionsObj = [{name: this.state.versionName, apkFile: this.state.apkFile, createdDate: new Date()}];
-        axios.post("http://localhost:3001/applications/add-version", {
-            applicationId: this.state.appKey,
-            name: this.state.versionName,
-            apkFile: this.state.apkFile,
-            createdDate: new Date(),
+    submitForm = (event) => {
+        this.setState({ file: event.target.files });
+        this.setState({ apkFile: event.target.files[0].name})
+        console.log('handle file upload', this.state.file, 'event', event.target.files[0]);
+    }
+
+    submitApk = (event) => {
+        const formData = new FormData();
+
+        formData.append('file', this.state.file[0]);
+        formData.append('timestamp', new Date())
+        axios.post("http://localhost:3001/api/apk-upload", formData, {
+            headers: {
+                'Content-Type': 'application/apk'
+            }
         }).then(response => {
-            console.log('responseee', response)
+            console.log('res fileupload', response)
+
             this.setState({
                 success: true,
-                message: "Application uploaded succesfully"
+                message: "File upload succesfully"
             });
-            this.renderRedirect();
         }).catch(error => {
             console.log(error)
-            console.log('rerror', error)
             this.setState({
                 success: true,
                 message: error.message
             });
+        });
+
+        const versionToAdd = {
+            projectId : this.state.appKey,
+            version: {
+                apkFile: this.state.apkFile,
+                createdDate: new Date(),
+                name: this.state.versionName
+            }
+        }
+        axios.post("http://localhost:3001/applications/addVersion", versionToAdd)
+        .then(response => {
+            console.log('Version added', response)
+            alert('Version added');
+            
+        }).catch(error => {
+            console.log(error)
+            alert('There was a problem adding the version');
         });
     }
 
@@ -123,7 +148,7 @@ export default class AddNewVersion extends Component {
                 <h1>Add new version</h1>
                 <br />
                 <br />
-                <Form>
+                <Form >
                     <FormGroup>
                         <Label for="exampleZip">Version name</Label>
                         <Input
@@ -142,7 +167,7 @@ export default class AddNewVersion extends Component {
                             </FormFeedback>
                     </FormGroup>
                         {this.renderFileUpload()}
-                    <Button color="primary">Submit</Button>
+                    <Button color="primary" onClick={this.submitApk} >Submit</Button>
                 </Form>
                 <br />
                 <br />
