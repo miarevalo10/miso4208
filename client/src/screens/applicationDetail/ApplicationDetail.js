@@ -10,6 +10,7 @@ import ScriptUpload from '../ScriptUpload';
 import NewTestRun from '../NewTestRun';
 import { Link } from "react-router-dom";
 import Vrtscreen from '../vrtscreen';
+import AddNewVersion from '../../AddNewVersion';
 
 
 export default class ApplicationDetail extends Component {
@@ -230,7 +231,7 @@ export default class ApplicationDetail extends Component {
         if(versions){
             return _.map(versions, (value,key)=> {
                 var date = value.createdDate ? " - Uploaded on: "+ this.formatDate(new Date(value.createdDate)) : ""
-                return <ListGroupItem>{value.name} {date}</ListGroupItem>
+                return <ListGroupItem key={key}>{value.name} {date}</ListGroupItem>
             })
         }
     }
@@ -304,16 +305,17 @@ export default class ApplicationDetail extends Component {
 
                 <Collapse isOpen={this.state.collapseTwo}>
                     <Card>
-                        <ScriptUpload application={app} />
+                        <AddNewVersion application={app} appKey={this.state.appKey} />
                     </Card>
                 </Collapse>
 
                 <Collapse isOpen={this.state.collapseThree}>
                     <Card>
-                        <Vrtscreen application={app} />
+                        <Vrtscreen application={app}  />
                     </Card>
                 </Collapse>
-
+                <br/>
+                <br/>
             </Container>
         )
     }
