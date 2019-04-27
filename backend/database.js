@@ -89,7 +89,6 @@ class Database {
   }
 
   updateProcess(projectId,versionId,processId, pstate) {
-    console.log('update process')
     let processStr = `projects/${projectId}/versions/${versionId}/process/${processId}`;
     console.log('update process', processStr);
 
