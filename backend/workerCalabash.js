@@ -26,7 +26,9 @@ const FOLDER_S3 = 'calabash/';
 *  testingSet: 'car_report_features2.zip', project: 'calabash-android', apkName: 'me.kuehle.carreport_79.apk' }
 */
 
-const rcvMsg = () => {
+var t = setInterval(rcvMsg, 2000);
+
+function rcvMsg() {
   sqs.receiveMessage(params, function (err, data) {
     if (err) console.log(err, err.stack);
     else {
@@ -42,6 +44,9 @@ const rcvMsg = () => {
   });
 }
 const downloadApk = (test) => {
+  let process = db.getProcess(test.projectId, test.processId)
+  process.update({ state: "In execution" })
+
   var params = {
     Bucket: 'pruebas-autom',
     Key: 'apks/' + test.apkName
@@ -99,10 +104,11 @@ const resignApk = (apkName) => {
 }
 
 const runTestingSet = (test) => {
-  shell.exec(`calabash-android run ${test.apkName} --format html --out report.html`);
+  console.log('running test suite', shell.exec(`calabash-android run ${test.apkName} --format html --out report.html`).stdout);
   uploadFileToS3('report.html', s3Path(test), 'text/html');
   uploadImages(test);
   updateProcess(test);
+  deleteMessage();
 }
 
 function uploadImages(test) {
@@ -117,6 +123,7 @@ function updateProcess(data) {
   let process = db.getProcess(data.projectId, data.processId)
   process.child('report').set(URL_S3 + s3Path(data) + 'report.html')
   process.update({ state: "Terminated" })
+  console.log(`Process ${data.processId} terminated`);
 }
 
 function s3Path(data) {
@@ -124,6 +131,7 @@ function s3Path(data) {
 }
 
 function uploadFileToS3(filePath, s3Path, contentType) {
+  console.log(`uploading file ${filePath} to ~${s3Path}`);
   var fileName = path.basename(filePath);
   var params = {
     Bucket: BUCKET_NAME,
@@ -135,6 +143,22 @@ function uploadFileToS3(filePath, s3Path, contentType) {
 
   s3.upload(params, function (err, data) {
     if (err) console.error("Error", err);
+  });
+}
+
+
+function deleteMessage()  {
+  var deleteParams = {
+    QueueUrl: params.QueueUrl,
+    ReceiptHandle: receiptHandle
+  };
+
+  sqs.deleteMessage(deleteParams, function(err, data) {
+    if (err) {
+      console.log("Delete Error", err);
+    } else {
+      console.log("Message Deleted", data);
+    }
   });
 }
 

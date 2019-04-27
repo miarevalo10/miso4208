@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import axios from "axios";
-
+import {
+    Col, Row
+} from 'reactstrap';
 export default class FileUpload extends Component {
 
     constructor(props) {
@@ -16,10 +18,12 @@ export default class FileUpload extends Component {
     submitFile = (event) => {
         event.preventDefault();
         const formData = new FormData();
+        //                'Content-Type': 'multipart/form-data'
+
         formData.append('file', this.state.file[0]);
         axios.post("http://localhost:3001/api/apk-upload", formData, {
             headers: {
-                'Content-Type': 'multipart/form-data'
+                'Content-Type': 'application/apk'
             }
         }).then(response => {
             this.setState({
@@ -52,13 +56,15 @@ export default class FileUpload extends Component {
             <div>
                 <h4>{this.state.title}</h4>
                 <form onSubmit={this.submitFile}>
+                <Row>
+                    <Col md={8}>
+                        <input label='upload file' type='file' onChange={this.handleFileUpload} />
+                    </Col>
+                    <Col md={4}>
+                        <button className="btn btn-primary" type='submit'>Upload</button>
+                    </Col>
+                    </Row>                   
                     
-                    <input label='upload file' type='file' onChange={this.handleFileUpload} />
-                    <br />
-                    <br />
-                    <button className="btn btn-primary" type='submit'>Upload</button>
-                    <br />
-                    <br />
                     <h4>{this.renderMessage()}</h4>
                 </form>
             </div>

@@ -7,6 +7,7 @@ const bluebird = require('bluebird');
 const multiparty = require('multiparty');
 const applications = require('./routes/applications');
 var AWS = require('aws-sdk');
+let db = require('./database');
 
 const API_PORT = 3001;
 const app = express();
@@ -38,31 +39,38 @@ app.use(allowCrossDomain);
 app.use('/applications', applications);
 
 router.post("/sendTest", (req, res) => {
-    // La idea sería mandar estos params desde el front
-    console.log('sendtest', req.body);
-    var msg = {}
-    var queue = ""
+    //console.log('sendtest', req.body);
+    var msg = {};
+    var queue = "";
+    const processId = db.saveProcess(req.body);
+
     switch (req.body.queue) {
         case "Monkey":
             msg = {
-                "apkName": req.body.apkName,
+                "apkName": req.body.apkFile,
                 "events": req.body.events,
                 "packageName": req.body.packageName,
-                "seed": req.body.seed
+                "seed": req.body.seed,
+                "projectId" : req.body.projectId,
+                "versionId": req.body.versionKey,
+                "processId": processId
             }
-            queue = process.env.SQS_RANDOM_MONKEY
+            queue = process.env.SQS_RANDOM_MONKEY;
+            break;
         case "Cypress":
             msg = {
-                "testingSet": req.body.apkName,
+                "testingSet": req.body.apkFile,
                 "project": req.body.project ||"cucumber-cypress",
             }
-            queue = process.env.SQS_CYPRESS
+            queue = process.env.SQS_CYPRESS;
+            break;
     }
     var params = {
         DelaySeconds: 0,
         MessageBody: JSON.stringify(msg),
         QueueUrl: queue
     };
+    console.log('Mesaggge sqsss', msg);
 
     sqs.sendMessage(params, function (err, data) {
         if (err) {
@@ -75,15 +83,27 @@ router.post("/sendTest", (req, res) => {
     });
 });
 
+
 const uploadFile = (buffer, name, type) => {
     const params = {
         ACL: 'public-read',
         Body: buffer,
         Bucket: process.env.S3_BUCKET || "pruebas-autom",
-        ContentType: type.mime,
-        Key: `${name}.${type.ext}`
+        ContentType: type,
+        Key: `${name}`
     };
+    console.log('paramas upload',params);
     return s3.upload(params).promise();
+    // s3.putObject(params, function (err, data) {
+     //   ContentType: type.mime,
+    //     if (err) {
+    //       console.log("Error: ", err);
+    //       return res.redire
+    //     } else {
+    //       console.log(data);
+    //     }
+    //   });
+   // return s3.upload(params).promise();
 };
 
 // Define POST route
@@ -92,13 +112,19 @@ router.post("/apk-upload", (request, response) => {
     form.parse(request, async (error, fields, files) => {
         if (error) throw new Error(error);
         try {
+            console.log('FILESSSS',files)
+            console.log('headers',files.file[0].headers,files.file[0].headers['content-type']);
+
             const path = files.file[0].path;
             const buffer = fs.readFileSync(path);
-            const type = fileType(buffer);
-            const timestamp = Date.now().toString();
-            const fileName = `apks/${timestamp}-lg`;
+            const type = files.file[0].headers['content-type'];
+            //const timestamp = Date.now().toString();
+            const name = files.file[0].originalFilename;
+
+            const fileName = `apks/${name}`;
 
             const data = await uploadFile(buffer, fileName, type);
+
             return response.status(200).send(data);
         } catch (error) {
             console.log(error)

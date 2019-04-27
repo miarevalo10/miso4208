@@ -8,8 +8,10 @@ export default class NewTestRun extends Component {
         super(props);
         this.state = {
             app: this.props.application,
+            appKey: this.props.appKey,
             apks: [],
             apkSelected: "",
+            versionKey:"",
             testsTypes: [
                 "Monkey",
                 "End2End",
@@ -20,13 +22,19 @@ export default class NewTestRun extends Component {
             technologies: [
                 "Monkey",
                 "Calabash",
-                "Espresso"
             ],
             technology: "Monkey",
             packageName: "",
             events: 100,
             seed: 1234
         };
+        console.log('app key in new test run', this.state.appKey)
+        console.log('app versions in newtestrun', this.state.app.versions);
+        _.map(this.state.app.versions, (value, key) => {
+            
+            console.log('value',value, 'key', key);
+        });
+
     }
 
     componentDidMount() {
@@ -39,7 +47,7 @@ export default class NewTestRun extends Component {
                 if (err) {
                     console.log(err);
                 } else {
-                    console.log(response.data.Contents);
+             //       console.log(response.data.Contents);
                     this.setState({ apks: response.data.Contents });
 
                 }
@@ -47,8 +55,10 @@ export default class NewTestRun extends Component {
     };
 
     onOptionChanged = (event) => {
+        console.log('key',event.target.value);
         this.setState({
-            apkSelected: event.target.value,
+            apkSelected: this.state.app.versions[event.target.value].apkFile,
+            versionKey: event.target.value
         });
     }
 
@@ -62,7 +72,7 @@ export default class NewTestRun extends Component {
         const {app} = this.state;
         if(app){
             return _.map(app.versions, (value, key) => {
-                return <option key={key} value={value.name}>{value.name}</option>
+                return <option key={key} value={key}>{value.name}</option>
             });
         } else {
             return this.state.apks.slice(1).map((apk) => {
@@ -154,17 +164,19 @@ export default class NewTestRun extends Component {
         console.log(this.state);
 
         axios.post("http://localhost:3001/api/sendTest", {
-            apkName: this.state.apkSelected,
+            apkFile: this.state.apkSelected,
             queue: this.state.technology,
             packageName: this.state.packageName,
             events: this.state.events,
-            seed: this.state.seed
+            seed: this.state.seed,
+            projectId: this.state.appKey,
+            versionKey:this.state.versionKey
         });
     }
 
     render() {
         var packageAndroid
-        console.log(this.state.app)
+        //console.log(this.state.app)
         if (this.state.app && this.state.app.type.toLowerCase() === 'android') {
             packageAndroid = (
                 <div className="form-group">

@@ -37,7 +37,8 @@ export default class Home extends Component {
                 <Link to={{
                     pathname: '/details',
                     state: {
-                        application: value
+                        application: value,
+                        key: key
                     }
                 }}>
                     {value.name}
