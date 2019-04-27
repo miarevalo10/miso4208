@@ -35,7 +35,9 @@ export default class NewTestRun extends Component {
 
             console.log('value', value, 'key', key);
         });
-
+        this.handleChange = this.handleChange.bind(this);
+        this.handleChangeEvents = this.handleChangeEvents.bind(this);
+        this.handleChangeSeed = this.handleChangeSeed.bind(this);
     }
 
     componentDidMount() {
@@ -179,16 +181,25 @@ export default class NewTestRun extends Component {
     }
 
     handleChangeEvents = (event) => {
-        this.setState({ events: event.target.events });
+        console.log('handle change events', event.target.value);
+        this.setState({ events: event.target.value });
+        console.log('handle change events state', this.state.events);
+
     }
 
     handleChangeSeed = (event) => {
-        this.setState({ seed: event.target.seed });
+        this.setState({ seed: event.target.value });
+        console.log('handle change seed', event.target.value);
+
+        console.log('handle change seed state', this.state.events);
+
     }
 
     handleSubmit = (event) => {
         event.preventDefault();
-        this.submitFile();
+        if(this.state.file) {
+            this.submitFile();
+        }
         if (this.state.apkSelected === "") {
             return;
         }
