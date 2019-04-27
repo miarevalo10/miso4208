@@ -2,12 +2,13 @@ import React, { Component } from 'react';
 import {
     ListGroup, ListGroupItem, Container,
     Badge, ListGroupItemHeading, ListGroupItemText,
-    Collapse, Button, CardBody,
-    Card, Row
+    Collapse, Button, Card,
+    Row
 } from 'reactstrap';
 import _ from 'lodash';
-import ScriptUpload from '../ScriptUpload'
-import NewTestRun from '../NewTestRun'
+import ScriptUpload from '../ScriptUpload';
+import NewTestRun from '../NewTestRun';
+import { Link } from "react-router-dom";
 
 
 export default class ApplicationDetail extends Component {
@@ -44,11 +45,20 @@ export default class ApplicationDetail extends Component {
         console.log("componbent mounted");
     }
 
-    renderMonkey = (process, key) => {
-        var report
-        if (process.report) {
-            report = <a href={process.report}>See report - </a>
-        }
+    renderMonkey = (process, key,version) => {
+        var report = <Link to={{
+                pathname: '/process-details',
+                state: {
+                    appKey: this.state.appKey,
+                    process: process,
+                    processKey: key,
+                    appName: this.state.application.name,
+
+                }
+            }}>
+                See report
+            </Link>
+        
         var events
         if (process.events) {
             events = <span>       # of events: {process.events} - </span>
@@ -57,35 +67,66 @@ export default class ApplicationDetail extends Component {
         if (process.seed) {
             seed = <span>Seed: {process.seed} - </span>
         }
-        var state
-        if (process.state) {
-            state = <span>State: {process.state} </span>
+        var stateHTML
+        var color
+        const {state} = process;
+        if (state) {
+            stateHTML = <span>State: {process.state} </span>
+            if(state === "Terminated" || state === "Finished"){
+                color = "success"
+            } else if (state === "Running" || state === "Sent") {
+                color = "info"
+            } else if (state === "Failed") {
+                color = "danger"
+            }
         }
-        return <ListGroupItem key={key}>
-            <ListGroupItemHeading>Monkey testing</ListGroupItemHeading>
+        console.log("color",color + " - " + process.state)
+        var title = "Monkey testing"
+        if(version){
+            title += " on version " + version.name 
+        }
+        return <ListGroupItem key={key} color={color}>
+            <ListGroupItemHeading>{title}</ListGroupItemHeading>
             <ListGroupItemText>
                 {report}
                 {events}
                 {seed}
-                {state}</ListGroupItemText>
+                {stateHTML}</ListGroupItemText>
 
         </ListGroupItem>
     }
 
     renderBDT = (process, key) => {
-        var report
-        if (process.report) {
-            report = <a href={process.report}>See report</a>
+        var report = <Link to={{
+                pathname: '/process-details',
+                state: {
+                    appKey: this.state.appKey,
+                    process: process,
+                    processKey: key
+                }
+            }}>
+                See report
+            </Link>
+        
+        var stateHTML
+        var color
+        const {state} = process;
+        if (state) {
+            stateHTML = <span>State: {process.state} </span>
+            if(state === "Terminated" || state === "Finished"){
+                color = "success"
+            } else if (state === "Running" || state === "Sent") {
+                color = "info"
+            } else if (state === "Failed") {
+                color = "danger"
+            }
         }
-        var state
-        if (process.state) {
-            state = <span> - State: {process.state}</span>
-        }
-        return <ListGroupItem key={key}>
+        return <ListGroupItem key={key} color={color}>
             <ListGroupItemHeading>BDT testing</ListGroupItemHeading>
             <ListGroupItemText>
                 {report}
-                {state}
+                 - 
+                {stateHTML}
             </ListGroupItemText>
         </ListGroupItem>
 
@@ -93,17 +134,37 @@ export default class ApplicationDetail extends Component {
 
     renderProcesses = () => {
         const { process } = this.state.application
-        return _.map(process, (value, key) => {
-            if (value.type.toLowerCase() === 'random') {
-                return this.renderMonkey(value, key)
-            } else if (value.type.toLowerCase() === 'bdt') {
-                return this.renderBDT(value, key)
-            } else {
-                return <ListGroupItem key={key}>
-                </ListGroupItem>
-            }
+        if (process) {
+            return _.map(process, (value, key) => {
+                if (value.type.toLowerCase() === 'random') {
+                    return this.renderMonkey(value, key)
+                } else if (value.type.toLowerCase() === 'bdt') {
+                    return this.renderBDT(value, key)
+                } else {
+                    return <ListGroupItem key={key}>
+                    </ListGroupItem>
+                }
 
-        })
+            })
+        } else {
+            const { versions } = this.state.application
+            return _.map(versions, (version, key) => {
+                const { process } = version;
+                return _.map(process, (value, key) => {
+                    if (value.type && (value.type.toLowerCase() === 'random'||value.type.toLowerCase() === 'monkey')) {
+                        return this.renderMonkey(value, key,version)
+                    } else if (value.type && value.type.toLowerCase() === 'bdt') {
+                        return this.renderBDT(value, key)
+                    } else {
+                        return <ListGroupItem key={key}>
+                            {value.state} - Version: {version.name}
+                        </ListGroupItem>
+                    }
+
+                })
+            })
+        }
+
     }
 
     renderBrowsers = () => {
@@ -156,18 +217,22 @@ export default class ApplicationDetail extends Component {
                 <ListGroup>
                     {this.renderProcesses()}
                 </ListGroup>
+                <br/>
+                <br/>
                 <Row>
                     <Container>
-                        <Button color="primary" onClick={this.toggle} style={{ marginBottom: '1rem' }}>New test</Button>
-                    
-                        <Button color="primary" onClick={this.toggleTwo} style={{ marginBottom: '1rem' }}>Upload script</Button>
+                        <Button outline size="lg" color="primary" onClick={this.toggle} style={{ marginBottom: '1rem' }}>New test</Button>
+
+                        <Button outline size="lg" color="primary" onClick={this.toggleTwo} style={{ marginBottom: '1rem' }}>Upload script</Button>
+
+                        <Button outline size="lg" color="primary" onClick={this.toggleTwo} style={{ marginBottom: '1rem' }}>Add new version</Button>
                     </Container>
 
                 </Row>
 
                 <Collapse isOpen={this.state.collapse}>
                     <Card>
-                        <NewTestRun application={app} appKey={this.state.appKey}/>
+                        <NewTestRun application={app} appKey={this.state.appKey} />
                     </Card>
                 </Collapse>
 

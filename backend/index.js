@@ -175,6 +175,31 @@ router.get("/get-apks", (req, res) => {
     });
 });
 
+router.get("/get-screenshots", (req,res) => {
+    const {
+        projectId,
+        processId,
+        appTechnology
+    } = req.query;
+
+    var route = appTechnology.toLowerCase()+"/"+projectId+"/process/"+processId+"/screenshots/";
+    var params = {
+        Bucket: "pruebas-autom",
+        Prefix: route,
+        MaxKeys: 3
+    };
+    console.log("get screenshots with params ", params)
+    s3.listObjects(params, function (err, data) {
+        if (err) {
+            console.log(err, err.stack);
+            return res.status(400).send(err);
+        } else {
+            console.log(data);
+            return res.status(200).send(data);
+        }
+    });
+})
+
 router.get("/get-script-cypress", (req, res) => {
     var params = {
         Bucket: "pruebas-autom",
