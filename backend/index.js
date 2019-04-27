@@ -64,14 +64,23 @@ router.post("/sendTest", (req, res) => {
             queue = process.env.SQS_CYPRESS;
             break;
         case "Calabash":
-        msg = {
-            "apkName": req.body.apkFile,
-            "projectId" : req.body.projectId,
-            "versionId": req.body.versionKey,
-            "processId": processId,
-            "testingSet": req.body.file
-        }
+            msg = {
+                "apkName": req.body.apkFile,
+                "projectId" : req.body.projectId,
+                "versionId": req.body.versionKey,
+                "processId": processId,
+                "testingSet": req.body.file
+            }
             queue = process.env.SQS_CALABASH;
+            break;
+        case "vrt":
+            msg = {
+                "versionOneId": req.body.versionOne,
+                "versionTwoId": req.body.versionTwo,
+                "processOneId": req.body.processOne,
+                "processTwoId": req.body.processTwo,
+            }
+            queue = process.env.SQS_VRT;
             break;
     }
     var params = {
