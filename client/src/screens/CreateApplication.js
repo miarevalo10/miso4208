@@ -9,7 +9,6 @@ import {
 import { Redirect } from 'react-router-dom';
 
 import axios from "axios";
-import FileUpload from './FileUpload';
 
 export default class CreateApplication extends Component {
 

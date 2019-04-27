@@ -57,6 +57,8 @@ export default class Home extends Component {
                         {this.renderApplications()}
                     </ListGroup>
                 </div>
+                <br />
+                <br />
             </Container>
         );
 
