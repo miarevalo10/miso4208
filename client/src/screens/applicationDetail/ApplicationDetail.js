@@ -6,11 +6,11 @@ import {
     Row, Input, Label
 } from 'reactstrap';
 import _ from 'lodash';
-import ScriptUpload from '../ScriptUpload';
 import NewTestRun from '../NewTestRun';
 import { Link } from "react-router-dom";
 import axios from "axios";
 import Vrtscreen from '../vrtscreen';
+import AddNewVersion from '../../AddNewVersion';
 
 
 export default class ApplicationDetail extends Component {
@@ -291,7 +291,7 @@ export default class ApplicationDetail extends Component {
         if(versions){
             return _.map(versions, (value,key)=> {
                 var date = value.createdDate ? " - Uploaded on: "+ this.formatDate(new Date(value.createdDate)) : ""
-                return <ListGroupItem>{value.name} {date}</ListGroupItem>
+                return <ListGroupItem key={key}>{value.name} {date}</ListGroupItem>
             })
         }
     }
@@ -365,7 +365,8 @@ export default class ApplicationDetail extends Component {
 
                 <Collapse isOpen={this.state.collapseTwo}>
                     <Card>
-                        {/* <ScriptUpload application={app} /> */}
+                         <AddNewVersion application={app} appKey={this.state.appKey} /> 
+                         {/*
                             Version Name
                             <Input
                                 name="versionName"
@@ -376,16 +377,17 @@ export default class ApplicationDetail extends Component {
                         <Label for="exampleZip">Upload apk </Label>
                             <input label='upload file' type='file' onChange={this.handleApkUpload} />
                         <button className="btn btn-primary" onClick={this.submitApk} >Upload</button>
-
+                            */}
                     </Card>
                 </Collapse>
 
                 <Collapse isOpen={this.state.collapseThree}>
                     <Card>
-                        <Vrtscreen application={app} />
+                        <Vrtscreen application={app}  />
                     </Card>
                 </Collapse>
-
+                <br/>
+                <br/>
             </Container>
         )
     }
