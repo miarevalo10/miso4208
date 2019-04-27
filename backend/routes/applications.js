@@ -16,6 +16,18 @@ router.get('/', function (req, res) {
     });
 });
 
+router.post("/addVersion", (req, res) => {
+    console.log('add version', req.body);
+    db.saveVersion(req.body.projectId,req.body.version).then(response => {
+        return res.status(200).send(response);
+      }).catch(error => {
+        console.log(error)
+        console.log('error en back', error)
+        return res.status(400).send(error);
+      });
+
+});
+
 router.post("/create", (req, res) => {
     console.log('sendtest reqbody', req.body);
     const {
