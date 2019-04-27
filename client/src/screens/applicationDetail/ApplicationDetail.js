@@ -3,7 +3,7 @@ import {
     ListGroup, ListGroupItem, Container,
     Badge, ListGroupItemHeading, ListGroupItemText,
     Collapse, Button, Card,
-    Row, Input, Label
+    Row,
 } from 'reactstrap';
 import _ from 'lodash';
 import NewTestRun from '../NewTestRun';
