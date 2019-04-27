@@ -10,6 +10,7 @@ import ScriptUpload from '../ScriptUpload';
 import NewTestRun from '../NewTestRun';
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Vrtscreen from '../vrtscreen';
 
 
 export default class ApplicationDetail extends Component {
@@ -19,7 +20,8 @@ export default class ApplicationDetail extends Component {
             application: this.props.location.state.application,
             appKey: this.props.location.state.key,
             collapse: false,
-            collapseTwo: false
+            collapseTwo: false,
+            collapseThree: false,
         }
     }
 
@@ -28,7 +30,11 @@ export default class ApplicationDetail extends Component {
         if (this.state.collapse) {
             this.setState(state => ({ collapse: !state.collapse }));
         } else {
-            this.setState(state => ({ collapse: !state.collapse, collapseTwo: false }));
+            this.setState(state => ({ 
+                collapse: !state.collapse, 
+                collapseTwo: false,
+                collapseThree: false
+            }));
         }
 
     }
@@ -37,12 +43,23 @@ export default class ApplicationDetail extends Component {
         if (this.state.collapseTwo) {
             this.setState(state => ({ collapseTwo: !state.collapseTwo }));
         } else {
-            this.setState(state => ({ collapseTwo: !state.collapseTwo, collapse: false }));
+            this.setState(state => ({ 
+                collapseTwo: !state.collapseTwo, 
+                collapse: false,
+                collapseThree: false
+             }));
         }
     }
 
-    componentDidMount() {
-        console.log("component mounted");
+    toggleThree = () => {
+        if (this.state.collapseThree) {
+            this.setState(state => ({ collapseThree: !state.collapseThree }));
+        } else {
+            this.setState(state => ({ 
+                collapseThree: !state.collapseThree, 
+                collapse: false,
+                collapseTwo: false }));
+        }
     }
 
     renderMonkey = (process, key,version) => {
@@ -74,13 +91,14 @@ export default class ApplicationDetail extends Component {
             stateHTML = <span>State: {process.state} </span>
             if(state === "Terminated" || state === "Finished"){
                 color = "success"
-            } else if (state === "Running" || state === "Sent") {
+            } else if (state === "Running" || state === "In progress") {
                 color = "info"
+            } else if (state === "Sent"){
+                color = "warning"
             } else if (state === "Failed") {
                 color = "danger"
             }
         }
-        console.log("color",color + " - " + process.state)
         var title = "Monkey testing"
         if(version){
             title += " on version " + version.name 
@@ -115,8 +133,10 @@ export default class ApplicationDetail extends Component {
             stateHTML = <span>State: {process.state} </span>
             if(state === "Terminated" || state === "Finished"){
                 color = "success"
-            } else if (state === "Running" || state === "Sent") {
+            } else if (state === "Running" || state === "In progress") {
                 color = "info"
+            } else if (state === "Sent"){
+                color = "warning"
             } else if (state === "Failed") {
                 color = "danger"
             }
@@ -156,8 +176,23 @@ export default class ApplicationDetail extends Component {
                     } else if (value.type && value.type.toLowerCase() === 'bdt') {
                         return this.renderBDT(value, key)
                     } else {
-                        return <ListGroupItem key={key}>
-                            {value.state} - Version: {version.name}
+                        var stateHTML
+                        var color
+                        const {state} = value;
+                        if (state) {
+                            stateHTML = <span>State: {value.state} </span>
+                            if(state === "Terminated" || state === "Finished"){
+                                color = "success"
+                            } else if (state === "Running" || state === "In progress") {
+                                color = "info"
+                            } else if (state === "Sent"){
+                                color = "warning"
+                            } else if (state === "Failed") {
+                                color = "danger"
+                            }
+                        }
+                        return <ListGroupItem key={key} color ={color}>
+                            {stateHTML} - Version: {version.name}
                         </ListGroupItem>
                     }
 
@@ -250,6 +285,30 @@ export default class ApplicationDetail extends Component {
         });
     }
 
+    renderVersionsOfApp = () =>{
+        const {versions} = this.state.application
+        if(versions){
+            return _.map(versions, (value,key)=> {
+                var date = value.createdDate ? " - Uploaded on: "+ this.formatDate(new Date(value.createdDate)) : ""
+                return <ListGroupItem>{value.name} {date}</ListGroupItem>
+            })
+        }
+    }
+
+     formatDate = (date) => {
+        var monthNames = [
+          "January", "February", "March",
+          "April", "May", "June", "July",
+          "August", "September", "October",
+          "November", "December"
+        ];
+      
+        var day = date.getDate();
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+      
+        return day + ' ' + monthNames[monthIndex] + ' ' + year;
+      }
 
     render() {
         const app = this.state.application;
@@ -279,13 +338,20 @@ export default class ApplicationDetail extends Component {
                 </ListGroup>
                 <br/>
                 <br/>
+                <h2>Versions</h2>
+                <br />
+                <ListGroup>
+                    {this.renderVersionsOfApp()}
+                </ListGroup>
+                <br/>
+                <br/>
                 <Row>
                     <Container>
                         <Button outline size="lg" color="primary" onClick={this.toggle} style={{ marginBottom: '1rem' }}>New test</Button>
 
-                        <Button outline size="lg" color="primary" onClick={this.toggleTwo} style={{ marginBottom: '1rem' }}>Upload script</Button>
-
                         <Button outline size="lg" color="primary" onClick={this.toggleTwo} style={{ marginBottom: '1rem' }}>Add new version</Button>
+
+                        <Button outline size="lg" color="primary" onClick={this.toggleThree} style={{ marginBottom: '1rem' }}>Run vrt</Button>
                     </Container>
 
                 </Row>
@@ -310,6 +376,12 @@ export default class ApplicationDetail extends Component {
                             <input label='upload file' type='file' onChange={this.handleApkUpload} />
                         <button className="btn btn-primary" onClick={this.submitApk} >Upload</button>
 
+                    </Card>
+                </Collapse>
+
+                <Collapse isOpen={this.state.collapseThree}>
+                    <Card>
+                        <Vrtscreen application={app} />
                     </Card>
                 </Collapse>
 
