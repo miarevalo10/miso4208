@@ -25,7 +25,7 @@ const URL_S3 = 'https://s3-us-west-2.amazonaws.com/' + BUCKET_NAME + "/"
 const FILENAME_REPORT = 'index.html'
 
 var params = {
-  QueueUrl: process.env.SQS_CYPRESS
+  QueueUrl: process.env.RANDOM_WEB
 };
 
 var receiptHandle = "";
@@ -145,8 +145,8 @@ function updateProcess(data) {
   let content = fs.readFileSync(RESULTS_FOLDER + 'mochawesome.json')
   let result = JSON.parse(content)
 
-  let process = db.getProcess(data.projectId, data.processId)
-  process.child('result').set(result)
+  let process = db.getProcess(data.projectId, data.versionId,data.processId);
+  process.child('result').set(result);
   process.child('report').set(URL_S3 + s3Path(data) + REPORTS_FOLDER.replace(BASE_PATH, "") + 'index.html')
   process.update({ state: "Terminated" })
 }

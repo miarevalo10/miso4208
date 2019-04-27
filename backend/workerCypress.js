@@ -28,7 +28,6 @@ var params = {
 };
 
 var receiptHandle = "";
-const basePath = './cypress/';
 
 /**
  * Msg example expected from queue
@@ -227,7 +226,7 @@ function updateProcess(data) {
   let content = fs.readFileSync('mochawesome_db.json')
   let result = JSON.parse(content)
 
-  let process = db.getProcess(data.projectId, data.processId)
+  let process = db.getProcess(data.projectId, data.versionId,data.processId)
   process.child('result').set(result)
   process.child('report').set(URL_S3 + s3Path(data) + REPORTS_FOLDER.replace(basePath, "") + 'index.html')
   process.update({ state: "Terminated" })

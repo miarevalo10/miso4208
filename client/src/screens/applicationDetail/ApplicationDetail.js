@@ -25,7 +25,6 @@ export default class ApplicationDetail extends Component {
         }
     }
 
-
     toggle = () => {
         if (this.state.collapse) {
             this.setState(state => ({ collapse: !state.collapse }));

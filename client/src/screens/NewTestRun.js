@@ -22,6 +22,8 @@ export default class NewTestRun extends Component {
             technologies: [
                 "Monkey",
                 "Calabash",
+                "Cypress",
+                "Random Web"
             ],
             technology: "Monkey",
             packageName: "",
@@ -132,9 +134,46 @@ export default class NewTestRun extends Component {
             case "Calabash":
                 return (<div className="formGroup">
                     <input label='upload file' type='file' onChange={this.handleFileUpload} />
-
-
                 </div>);
+
+            case "Cypress":
+                return (<div className="formGroup">
+                    <input label='upload file' type='file' onChange={this.handleFileUpload} />
+                </div>);
+            case "Random Web":
+                return (
+                    <div>
+                        <div className="form-group">
+                            <label htmlFor="events">Number of events</label>
+                            <div className="input-group">
+                                <input
+                                    type="number"
+                                    value={this.state.events}
+                                    onChange={this.handleChangeEvents}
+                                    className="form-control"
+                                    id="events"
+                                    required />
+                                <div className="invalid-feedback">
+                                    Please provide a number of events name
+                                        </div>
+                            </div>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="seed">Seed</label>
+                            <div className="input-group">
+                                <input
+                                    type="number"
+                                    value={this.state.seed}
+                                    onChange={this.handleChangeSeed}
+                                    className="form-control"
+                                    id="seed"
+                                    required />
+                                <div className="invalid-feedback">
+                                    Please provide a number of events name
+                                        </div>
+                            </div>
+                        </div>
+                    </div>);
 
             default:
                 return (<div>
@@ -196,7 +235,7 @@ export default class NewTestRun extends Component {
 
     handleSubmit = (event) => {
         event.preventDefault();
-        if(this.state.file) {
+        if (this.state.file) {
             this.submitFile();
         }
         if (this.state.apkSelected === "") {
@@ -226,7 +265,23 @@ export default class NewTestRun extends Component {
                 versionKey: this.state.versionKey,
                 file: this.state.fileName
             }
+        } else if (this.state.technology === 'Cypress') {
+            test = {
+                queue: this.state.technology,
+                projectId: this.state.appKey,
+                versionKey: this.state.versionKey,
+                file: this.state.fileName
+            }
+        } else if (this.state.technology === 'Random Web') {
+            test = {
+                queue: 'Random',
+                events: this.state.events,
+                seed: this.state.seed,
+                projectId: this.state.appKey,
+                versionKey: this.state.versionKey,
+            }
         }
+        
 
         axios.post("http://localhost:3001/api/sendTest", test).then(response => {
             alert("The test was submitted succesfully!");

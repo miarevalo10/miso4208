@@ -30,7 +30,7 @@ var allowCrossDomain = function (req, res, next) {
 }
 
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(morgan('combined'));
 app.use(allowCrossDomain);
@@ -38,7 +38,7 @@ app.use(allowCrossDomain);
 app.use('/applications', applications);
 
 router.post("/sendTest", (req, res) => {
-    //console.log('sendtest', req.body);
+    console.log('sendtest', req.body);
     var msg = {};
     var queue = "";
     const processId = db.saveProcess(req.body);
@@ -50,7 +50,7 @@ router.post("/sendTest", (req, res) => {
                 "events": req.body.events,
                 "packageName": req.body.packageName,
                 "seed": req.body.seed,
-                "projectId" : req.body.projectId,
+                "projectId": req.body.projectId,
                 "versionId": req.body.versionKey,
                 "processId": processId
             }
@@ -58,20 +58,33 @@ router.post("/sendTest", (req, res) => {
             break;
         case "Cypress":
             msg = {
-                "testingSet": req.body.apkFile,
-                "project": req.body.project ||"cucumber-cypress",
+                "testingSet": req.body.file,
+                "projectId": req.body.projectId,
+                "versionId": req.body.versionKey,
+                "processId": processId,
+                "project": req.body.file.slice(0, -4)
             }
             queue = process.env.SQS_CYPRESS;
             break;
         case "Calabash":
             msg = {
                 "apkName": req.body.apkFile,
-                "projectId" : req.body.projectId,
+                "projectId": req.body.projectId,
                 "versionId": req.body.versionKey,
                 "processId": processId,
-                "testingSet": req.body.file
+                "testingSet": req.body.file,
             }
             queue = process.env.SQS_CALABASH;
+            break;
+        case "Random":
+            msg = {
+                "events": req.body.events,
+                "seed": req.body.seed,
+                "projectId": req.body.projectId,
+                "versionId": req.body.versionKey,
+                "processId": processId
+            }
+            queue = process.env.SQS_RANDOM_WEB;
             break;
         case "vrt":
             msg = {
@@ -92,7 +105,7 @@ router.post("/sendTest", (req, res) => {
 
     sqs.sendMessage(params, function (err, data) {
         if (err) {
-            console.log('sqs error msg ',err);
+            console.log('sqs error msg ', err);
             res.json({ success: false, error: err }); ("Error", err);
         } else {
             console.log('success');
@@ -110,7 +123,7 @@ const uploadFile = (buffer, name, type) => {
         ContentType: type,
         Key: `${name}`
     };
-    console.log('params upload',params);
+    console.log('params upload', params);
     return s3.upload(params).promise();
 };
 
@@ -120,8 +133,8 @@ router.post("/apk-upload", (request, response) => {
     form.parse(request, async (error, fields, files) => {
         if (error) throw new Error(error);
         try {
-            console.log('FILESSSS',files)
-            console.log('headers',files.file[0].headers,files.file[0].headers['content-type']);
+            console.log('FILESSSS', files)
+            console.log('headers', files.file[0].headers, files.file[0].headers['content-type']);
 
             const path = files.file[0].path;
             const buffer = fs.readFileSync(path);
@@ -184,14 +197,14 @@ router.get("/get-apks", (req, res) => {
     });
 });
 
-router.get("/get-screenshots", (req,res) => {
+router.get("/get-screenshots", (req, res) => {
     const {
         projectId,
         processId,
         appTechnology
     } = req.query;
 
-    var route = appTechnology.toLowerCase()+"/"+projectId+"/process/"+processId+"/screenshots/";
+    var route = appTechnology.toLowerCase() + "/" + projectId + "/process/" + processId + "/screenshots/";
     var params = {
         Bucket: "pruebas-autom",
         Prefix: route,

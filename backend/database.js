@@ -103,6 +103,12 @@ class Database {
         state: 'Sent',
         type: process.queue
       }
+    } else if (process.queue === 'Cypress') {
+      dbProcess = {
+        file: process.file,
+        state: 'Sent',
+        type: 'BDT'
+      }
     }
     return db.ref(refPush).push(dbProcess).key;
   }
