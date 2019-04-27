@@ -79,11 +79,24 @@ class Database {
   saveProcess(process) {
     const refPush = `projects/${process.projectId}/versions/${process.versionKey}/process`;
     console.log(`ruta para push ${refPush}`);
-    const dbProcess = {
-      events: process.events,
-      seed: process.seed,
+    let dbProcess = {
+      ... process,
       state: 'Sent',
       type: process.queue
+    }
+    if(process.queue === 'Monkey') {
+      dbProcess = {
+        events: process.events,
+        seed: process.seed,
+        state: 'Sent',
+        type: process.queue
+      }
+    } else if(process.queue === 'Calabash') {
+      dbProcess = {
+        file: process.file,
+        state: 'Sent',
+        type: process.queue
+      }
     }
     return db.ref(refPush).push(dbProcess).key;
   }

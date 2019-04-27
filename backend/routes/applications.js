@@ -9,7 +9,7 @@ router.use(function timeLog(req, res, next) {
 });
 
 router.get('/', function (req, res) {
-    console.log("get all applications");
+    //console.log("get all applications");
     db.getApplications((data)=>{
         console.log(data.val())
         return res.status(200).send(data.val());

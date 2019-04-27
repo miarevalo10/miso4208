@@ -13,7 +13,6 @@ const API_PORT = 3001;
 const app = express();
 const router = express.Router();
 
-
 AWS.config.update({
     region: 'us-west-2',
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -64,17 +63,27 @@ router.post("/sendTest", (req, res) => {
             }
             queue = process.env.SQS_CYPRESS;
             break;
+        case "Calabash":
+        msg = {
+            "apkName": req.body.apkFile,
+            "projectId" : req.body.projectId,
+            "versionId": req.body.versionKey,
+            "processId": processId,
+            "testingSet": req.body.file
+        }
+            queue = process.env.SQS_CALABASH;
+            break;
     }
     var params = {
         DelaySeconds: 0,
         MessageBody: JSON.stringify(msg),
         QueueUrl: queue
     };
-    console.log('Mesaggge sqsss', msg);
+    //console.log('Mesaggge sqsss', msg);
 
     sqs.sendMessage(params, function (err, data) {
         if (err) {
-            console.log(err);
+            console.log('sqs error msg ',err);
             res.json({ success: false, error: err }); ("Error", err);
         } else {
             console.log('success');
@@ -92,18 +101,8 @@ const uploadFile = (buffer, name, type) => {
         ContentType: type,
         Key: `${name}`
     };
-    console.log('paramas upload',params);
+    console.log('params upload',params);
     return s3.upload(params).promise();
-    // s3.putObject(params, function (err, data) {
-     //   ContentType: type.mime,
-    //     if (err) {
-    //       console.log("Error: ", err);
-    //       return res.redire
-    //     } else {
-    //       console.log(data);
-    //     }
-    //   });
-   // return s3.upload(params).promise();
 };
 
 // Define POST route
@@ -139,11 +138,12 @@ router.post("/script-upload", (request, response) => {
     form.parse(request, async (error, fields, files) => {
         if (error) throw new Error(error);
         try {
+            //console.log('SCRIPT-UPLOAD',files);
             const path = files.file[0].path;
             const buffer = fs.readFileSync(path);
-            const type = fileType(buffer);
-            const timestamp = Date.now().toString();
-            const fileName = `scripts/${timestamp}-lg`;
+            const type = files.file[0].headers['content-type'];
+            const name = files.file[0].originalFilename;
+            const fileName = `scripts/${name}`;
 
             const data = await uploadFile(buffer, fileName, type);
             return response.status(200).send(data);
@@ -193,9 +193,6 @@ router.get("/get-script-cypress", (req, res) => {
         }
     });
 });
-
-
-
 
 // append /api for our http requests
 app.use("/api", router);
