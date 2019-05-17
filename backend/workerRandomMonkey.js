@@ -12,7 +12,7 @@ var params = {
   QueueUrl: process.env.SQS_RANDOM_MONKEY
 };
 
-//launchEmulator();
+launchEmulator();
 
 var receiptHandle = "";
 const basePath = './apks/';
@@ -70,7 +70,7 @@ function runMonkeyTest(events, packageName, apkName) {
   console.log('installing', shell.exec(adb + ' install apks/' + apkName).stdout);
   const seedRandom = getRandomInt(1, 100000);
   shell.exec(adb + ' shell monkey -p ' + packageName + ' -s ' + seedRandom + ' -v ' + events + ' >> results.txt');
-  uploadFileToS3('results.txt', s3Path(testObj), 'text');
+  uploadFileToS3('results.txt', s3Path(testObj), 'text/plain');
   updateProcess(testObj);
   deleteMessage();
 }
