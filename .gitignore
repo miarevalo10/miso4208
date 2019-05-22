@@ -3,3 +3,7 @@ package-lock.json
 backend/serviceAccountKey.json
 calabash/
 me.kuehle.carreport_79.apk
+.env
+.env.save
+cypress/
+vrt/

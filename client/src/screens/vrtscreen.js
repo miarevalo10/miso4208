@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from "axios";
+import { Link } from "react-router-dom";
 import {
     Container, Form,
     FormGroup, Label, Input,
@@ -13,16 +14,23 @@ export default class Vrtscreen extends Component {
         super(props);
         this.state = {
             application: this.props.application,
-            versions:[],
+            versions: [],
             versionOne: "",
             versionTwo: "",
             processOne: "",
             processTwo: "",
-            collapseTwo:false,
+            collapseTwo: false,
             collapseThree: false,
             collapseFour: false,
             collapseFifth: false,
+            projectId: this.props.projectId
         }
+        this.handleChange = this.handleChange.bind(this);
+        this.handleChangeProcessOne = this.handleChangeProcessOne.bind(this);
+        this.handleChangeProcessTwo = this.handleChangeProcessTwo.bind(this);
+        this.handleChangeVersionOne = this.handleChangeVersionOne.bind(this);
+        this.handleChangeVersionTwo = this.handleChangeVersionTwo.bind(this);
+
     }
 
     changeVisibilitySecondPart(show) {
@@ -41,11 +49,11 @@ export default class Vrtscreen extends Component {
     componentDidMount() {
         var versions = [];
         _.map(this.state.application.versions, (value, key) => {
-            value.key=key;
+            value.key = key;
             versions.push(value)
         })
-        this.setState({versions});
-        
+        this.setState({ versions });
+
     }
 
     sendMsg() {
@@ -65,76 +73,107 @@ export default class Vrtscreen extends Component {
 
     handleChangeVersionOne = (event) => {
         const { target } = event;
-        const {versions} = this.state
-        var version = versions.find((ele)=> { return ele.key===target.value})
+        console.log('event', event, 'target', target.value)
+        const { versions } = this.state;
+        var version = versions.find((ele) => { return ele.key === target.value })
+        console.log('verions 1', version);
         this.setState({
-            versionOne:version,
+            versionOne: version,
         });
     }
 
     handleChangeVersionTwo = (event) => {
         const { target } = event;
-        const {versions} = this.state
-        var version = versions.find((ele)=> { return ele.key===target.value})
+        const { versions } = this.state
+        var version = versions.find((ele) => { return ele.key === target.value })
         this.setState({
-            versionTwo:version,
+            versionTwo: version,
         });
     }
 
     handleChangeProcessOne = (event) => {
         const { target } = event;
-        const {process} = this.state.versionOne
-        console.log("process one:",process)
-        var toSave 
-         _.forEach(process,  (value,key) =>  {
-             if(key===target.value) {
-                 toSave = value
-                }
+        const { process } = this.state.versionOne
+        console.log("process one:", process)
+        var toSave;
+        var toSaveKey;
+        _.forEach(process, (value, key) => {
+            console.log('value', value, 'key', key)
+            if (key === target.value) {
+                toSave = value;
+                toSave.key = key;
+                this.setState({
+                    processOne: toSave
+                });
+                return;
+            }
         })
+        console.log('to save', toSave);
         this.setState({
-            processOne:toSave,
+            processOneKey: toSave
         });
     }
 
     handleChangeProcessTwo = (event) => {
         const { target } = event;
-        const {process} = this.state.versionTwo
-        var toSave 
-         _.forEach(process,  (value,key) =>  {
-             if(key===target.value) {
-                 toSave = value
-                }
+        const { process } = this.state.versionTwo
+        var toSave;
+        var toSaveKey;
+        _.forEach(process, (value, key) => {
+            if (key === target.value) {
+                toSave = value;
+                toSave.key = key;
+                this.setState({
+                    processTwo: toSave
+                });
+                return;
+            }
         })
-        this.setState({
-            processTwo:toSave,
-        });
+
     }
 
     renderVersions = () => {
-        const {versions} = this.state;
+        const { versions } = this.state;
         return versions.map((version) => {
             return <option value={version.key} key={version.key}>{version.name}</option>
         })
     }
 
     renderProcesses = () => {
-        const {process} = this.state.versionOne
-        return _.map(process, (value,key) => {
-            return <option value={key} key={key}>{value.state}</option>
+        const { process } = this.state.versionOne
+
+        return _.map(process, (value, key) => {
+            return <option value={key} key={key}>{value.lastUpdate} - {value.state}</option>
         })
     }
 
     renderProcessesTwo = () => {
-        const {process} = this.state.versionTwo
-        return _.map(process, (value,key) => {
-            return <option value={key} key={key}>{value.state}</option>
+        const { process } = this.state.versionTwo
+        return _.map(process, (value, key) => {
+            return <option value={key} key={key}>{value.lastUpdate} - {value.state}</option>
         })
     }
 
 
     submitForm = (e) => {
         e.preventDefault();
-        console.log("submit",this.state)
+        console.log("submit", this.state);
+        const test = {
+            projectId : this.state.projectId,
+            versionOneId: this.state.versionOne.key,
+            versionTwoId: this.state.versionTwo.key,
+            processOneId: this.state.processOne.key,
+            processTwoId: this.state.processTwo.key,
+            queue: 'vrt'
+        }
+        console.log('TESTT', test);
+        axios.post("http://localhost:3001/api/sendTest", test).then(response => {
+            console.log('response', response);
+            alert("The test was submitted succesfully!");
+        }).catch(error => {
+            console.log(error)
+            alert("There was an error creating your test");
+        });
     }
 
     checkCanSubmitForm = () => {
@@ -149,16 +188,15 @@ export default class Vrtscreen extends Component {
             collapseFifth
             && versionOne
             && versionTwo
-            && versionOne!==versionTwo
+            //&& versionOne!==versionTwo
             && processOne
             && processTwo
             && processOne.file === processTwo.file
             && processOne.type === processTwo.type
-            
+
         )
-            
-        
     }
+
 
     render() {
         return (
@@ -166,9 +204,9 @@ export default class Vrtscreen extends Component {
                 <Form onSubmit={(e) => this.submitForm(e)}>
                     <FormGroup>
                         <Label for="exampleSelect">Original version</Label>
-                        <Input 
-                            type="select" 
-                            name="versionOne" 
+                        <Input
+                            type="select"
+                            name="versionOne"
                             id="versionOne"
                             onChange={(e) => {
                                 this.handleChangeVersionOne(e)
@@ -179,55 +217,65 @@ export default class Vrtscreen extends Component {
                         </Input>
                     </FormGroup>
                     <Collapse isOpen={this.state.collapseTwo}>
-                    <FormGroup>
-                        <Label for="exampleSelect">Process of original version</Label>
-                        <Input 
-                            type="select" 
-                            name="processOne" 
-                            id="processOne"
-                            onChange={(e) => {
-                                this.handleChangeProcessOne(e)
-                                this.changeVisibilityThirdPart(true)
-                            }}>
-                            <option selected disabled>Select option</option>
-                            {this.renderProcesses()}
-                        </Input>
-                    </FormGroup>
+                        <FormGroup>
+                            <Label for="exampleSelect">Process of original version</Label>
+                            <Input
+                                type="select"
+                                name="processOne"
+                                id="processOne"
+                                onChange={(e) => {
+                                    this.handleChangeProcessOne(e)
+                                    this.changeVisibilityThirdPart(true)
+                                }}>
+                                <option selected disabled>Select option</option>
+                                {this.renderProcesses()}
+                            </Input>
+                        </FormGroup>
                     </Collapse>
                     <Collapse isOpen={this.state.collapseThree}>
-                    <FormGroup>
-                        <Label for="exampleSelect">Version to compare</Label>
-                        <Input 
-                            type="select" 
-                            name="versionTwo" 
-                            id="versionTwo"
-                            onChange={(e) => {
-                                this.handleChangeVersionTwo(e)
-                                this.changeVisibilityFourthPart(true)
-                            }}>
-                            <option selected disabled>Select option</option>
-                            {this.renderVersions()}
-                        </Input>
-                    </FormGroup>
+                        <FormGroup>
+                            <Label for="exampleSelect">Version to compare</Label>
+                            <Input
+                                type="select"
+                                name="versionTwo"
+                                id="versionTwo"
+                                onChange={(e) => {
+                                    this.handleChangeVersionTwo(e)
+                                    this.changeVisibilityFourthPart(true)
+                                }}>
+                                <option selected disabled>Select option</option>
+                                {this.renderVersions()}
+                            </Input>
+                        </FormGroup>
                     </Collapse>
                     <Collapse isOpen={this.state.collapseFour}>
-                    <FormGroup>
-                        <Label for="exampleSelect">Process of version to compare</Label>
-                        <Input 
-                            type="select" 
-                            name="processTwo" 
-                            id="processTwo"
-                            onChange={(e) => {
-                                this.handleChangeProcessTwo(e)
-                                this.changeVisibilityFifthPart(true)
-                            }}>
-                            <option selected disabled>Select option</option>
-                            {this.renderProcessesTwo()}
-                        </Input>
-                    </FormGroup>
+                        <FormGroup>
+                            <Label for="exampleSelect">Process of version to compare</Label>
+                            <Input
+                                type="select"
+                                name="processTwo"
+                                id="processTwo"
+                                onChange={(e) => {
+                                    this.handleChangeProcessTwo(e)
+                                    this.changeVisibilityFifthPart(true)
+                                }}>
+                                <option selected disabled>Select option</option>
+                                {this.renderProcessesTwo()}
+                            </Input>
+                        </FormGroup>
                     </Collapse>
                     <Collapse isOpen={this.checkCanSubmitForm()}>
-                        <Button color="primary">Run vrt</Button>
+                        {/* <Link to={{
+                pathname: '/vrt-report',
+                state: {
+                    versionOne: this.state.versionOne,
+                    versionTwo: this.state.versionTwo,
+                    processOne: this.state.processOne,
+                    processTwo: this.state.processTwo
+                }
+            }}> */}
+                        <Button type="submit" color="primary">Run vrt</Button>
+                        {/* </Link> */}
                     </Collapse>
                 </Form>
             </Container>

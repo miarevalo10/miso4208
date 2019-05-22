@@ -29,8 +29,8 @@ export default class ApplicationDetail extends Component {
         if (this.state.collapse) {
             this.setState(state => ({ collapse: !state.collapse }));
         } else {
-            this.setState(state => ({ 
-                collapse: !state.collapse, 
+            this.setState(state => ({
+                collapse: !state.collapse,
                 collapseTwo: false,
                 collapseThree: false
             }));
@@ -42,11 +42,11 @@ export default class ApplicationDetail extends Component {
         if (this.state.collapseTwo) {
             this.setState(state => ({ collapseTwo: !state.collapseTwo }));
         } else {
-            this.setState(state => ({ 
-                collapseTwo: !state.collapseTwo, 
+            this.setState(state => ({
+                collapseTwo: !state.collapseTwo,
                 collapse: false,
                 collapseThree: false
-             }));
+            }));
         }
     }
 
@@ -54,27 +54,28 @@ export default class ApplicationDetail extends Component {
         if (this.state.collapseThree) {
             this.setState(state => ({ collapseThree: !state.collapseThree }));
         } else {
-            this.setState(state => ({ 
-                collapseThree: !state.collapseThree, 
+            this.setState(state => ({
+                collapseThree: !state.collapseThree,
                 collapse: false,
-                collapseTwo: false }));
+                collapseTwo: false
+            }));
         }
     }
 
-    renderMonkey = (process, key,version) => {
+    renderMonkey = (process, key, version) => {
         var report = <Link to={{
-                pathname: '/process-details',
-                state: {
-                    appKey: this.state.appKey,
-                    process: process,
-                    processKey: key,
-                    appName: this.state.application.name,
+            pathname: '/process-details',
+            state: {
+                appKey: this.state.appKey,
+                process: process,
+                processKey: key,
+                appName: this.state.application.name,
 
-                }
-            }}>
-                See report
+            }
+        }}>
+            See report
             </Link>
-        
+
         var events
         if (process.events) {
             events = <span>       # of events: {process.events} - </span>
@@ -85,22 +86,22 @@ export default class ApplicationDetail extends Component {
         }
         var stateHTML
         var color
-        const {state} = process;
+        const { state } = process;
         if (state) {
             stateHTML = <span>State: {process.state} </span>
-            if(state === "Terminated" || state === "Finished"){
+            if (state === "Terminated" || state === "Finished") {
                 color = "success"
             } else if (state === "Running" || state === "In progress") {
                 color = "info"
-            } else if (state === "Sent"){
+            } else if (state === "Sent") {
                 color = "warning"
             } else if (state === "Failed") {
                 color = "danger"
             }
         }
         var title = "Monkey testing"
-        if(version){
-            title += " on version " + version.name 
+        if (version) {
+            title += " on version " + version.name
         }
         return <ListGroupItem key={key} color={color}>
             <ListGroupItemHeading>{title}</ListGroupItemHeading>
@@ -114,13 +115,13 @@ export default class ApplicationDetail extends Component {
     }
 
     renderBDT = (process, key) => {
-        const {state} = process;
+        const { state } = process;
 
         var stateHTML
         var color
         if (state) {
             stateHTML = <span>State: {process.state} </span>
-            if(state === "Terminated" || state === "Finished"){
+            if (state === "Terminated" || state === "Finished") {
                 color = "success";
                 var report = <Link to={{
                     pathname: '/process-details',
@@ -132,10 +133,10 @@ export default class ApplicationDetail extends Component {
                 }}>
                     See report
                 </Link>
-        
+
             } else if (state === "Running" || state === "In progress") {
                 color = "info"
-            } else if (state === "Sent"){
+            } else if (state === "Sent") {
                 color = "warning"
             } else if (state === "Failed") {
                 color = "danger"
@@ -145,7 +146,45 @@ export default class ApplicationDetail extends Component {
             <ListGroupItemHeading>BDT testing</ListGroupItemHeading>
             <ListGroupItemText>
                 {report}
-                 - 
+                -
+                {stateHTML}
+            </ListGroupItemText>
+        </ListGroupItem>
+
+    }
+
+    renderVRT = (process, key) => {
+        const { state } = process;
+
+        var stateHTML;
+        var color;
+        if (state) {
+            stateHTML = <span>State: {process.state} </span>
+            if (state === "Terminated" || state === "Finished") {
+                color = "success";
+                var report = <Link to={{
+                    pathname: '/vrt-report',
+                    state: {
+                        appKey: this.state.appKey,
+                        vrtKey: key
+                    }
+                }}>
+                    See report
+                </Link>
+
+            } else if (state === "Running" || state === "In progress") {
+                color = "info"
+            } else if (state === "Sent") {
+                color = "warning"
+            } else if (state === "Failed") {
+                color = "danger"
+            }
+        }
+        return <ListGroupItem key={key} color={color}>
+            <ListGroupItemHeading>BDT testing</ListGroupItemHeading>
+            <ListGroupItemText>
+                {report}
+                -
                 {stateHTML}
             </ListGroupItemText>
         </ListGroupItem>
@@ -153,45 +192,47 @@ export default class ApplicationDetail extends Component {
     }
 
     renderProcesses = () => {
-        const { process } = this.state.application
-        if (process) {
-            return _.map(process, (value, key) => {
-                if (value.type.toLowerCase() === 'random') {
-                    return this.renderMonkey(value, key)
-                } else if (value.type.toLowerCase() === 'bdt' || value.type.toLowerCase() === 'calabash') {
-                    return this.renderBDT(value, key)
-                } else {
-                    return <ListGroupItem key={key}>
-                    </ListGroupItem>
-                }
+        console.log('application',this.state.application);
+        // const { process } = this.state.application;
+        // if (process) {
+        //     return _.map(process, (value, key) => {
+        //         if (value.type.toLowerCase() === 'random') {
+        //             return this.renderMonkey(value, key)
+        //         } else if (value.type.toLowerCase() === 'bdt' || value.type.toLowerCase() === 'calabash') {
+        //             return this.renderBDT(value, key)
+        //         } else {
+        //             return <ListGroupItem key={key}>
+        //             </ListGroupItem>
+        //         }
 
-            })
-        } else {
-            const { versions } = this.state.application
+        //     })
+        // }
+        const { versions } = this.state.application;
+        if (versions) {
             return _.map(versions, (version, key) => {
                 const { process } = version;
                 return _.map(process, (value, key) => {
-                    if (value.type && (value.type.toLowerCase() === 'random'||value.type.toLowerCase() === 'monkey')) {
-                        return this.renderMonkey(value, key,version)
+                    if (value.type && (value.type.toLowerCase() === 'random' || value.type.toLowerCase() === 'monkey')) {
+                        return this.renderMonkey(value, key, version)
                     } else if (value.type && (value.type.toLowerCase() === 'bdt' || value.type.toLowerCase() === 'calabash')) {
                         return this.renderBDT(value, key)
                     } else {
                         var stateHTML
                         var color
-                        const {state} = value;
+                        const { state } = value;
                         if (state) {
                             stateHTML = <span>State: {value.state} </span>
-                            if(state === "Terminated" || state === "Finished"){
+                            if (state === "Terminated" || state === "Finished") {
                                 color = "success"
                             } else if (state === "Running" || state === "In progress") {
                                 color = "info"
-                            } else if (state === "Sent"){
+                            } else if (state === "Sent") {
                                 color = "warning"
                             } else if (state === "Failed") {
                                 color = "danger"
                             }
                         }
-                        return <ListGroupItem key={key} color ={color}>
+                        return <ListGroupItem key={key} color={color}>
                             {stateHTML} - Version: {version.name}
                         </ListGroupItem>
                     }
@@ -199,6 +240,7 @@ export default class ApplicationDetail extends Component {
                 })
             })
         }
+
 
     }
 
@@ -238,7 +280,7 @@ export default class ApplicationDetail extends Component {
 
     handleApkUpload = (event) => {
         this.setState({ file: event.target.files });
-        this.setState({ apkFile: event.target.files[0].name})
+        this.setState({ apkFile: event.target.files[0].name })
         console.log('handle file upload', this.state.file, 'event', event.target.files[0]);
     }
 
@@ -267,7 +309,7 @@ export default class ApplicationDetail extends Component {
         });
 
         const versionToAdd = {
-            projectId : this.state.appKey,
+            projectId: this.state.appKey,
             version: {
                 apkFile: this.state.apkFile,
                 createdDate: new Date(),
@@ -275,40 +317,40 @@ export default class ApplicationDetail extends Component {
             }
         }
         axios.post("http://localhost:3001/applications/addVersion", versionToAdd)
-        .then(response => {
-            console.log('Version added', response)
-            alert('Version added');
-            
-        }).catch(error => {
-            console.log(error)
-            alert('There was a problem adding the version');
-        });
+            .then(response => {
+                console.log('Version added', response)
+                alert('Version added');
+
+            }).catch(error => {
+                console.log(error)
+                alert('There was a problem adding the version');
+            });
     }
 
-    renderVersionsOfApp = () =>{
-        const {versions} = this.state.application
-        if(versions){
-            return _.map(versions, (value,key)=> {
-                var date = value.createdDate ? " - Uploaded on: "+ this.formatDate(new Date(value.createdDate)) : ""
+    renderVersionsOfApp = () => {
+        const { versions } = this.state.application
+        if (versions) {
+            return _.map(versions, (value, key) => {
+                var date = value.createdDate ? " - Uploaded on: " + this.formatDate(new Date(value.createdDate)) : ""
                 return <ListGroupItem key={key}>{value.name} {date}</ListGroupItem>
             })
         }
     }
 
-     formatDate = (date) => {
+    formatDate = (date) => {
         var monthNames = [
-          "January", "February", "March",
-          "April", "May", "June", "July",
-          "August", "September", "October",
-          "November", "December"
+            "January", "February", "March",
+            "April", "May", "June", "July",
+            "August", "September", "October",
+            "November", "December"
         ];
-      
+
         var day = date.getDate();
         var monthIndex = date.getMonth();
         var year = date.getFullYear();
-      
+
         return day + ' ' + monthNames[monthIndex] + ' ' + year;
-      }
+    }
 
     render() {
         const app = this.state.application;
@@ -336,15 +378,15 @@ export default class ApplicationDetail extends Component {
                 <ListGroup>
                     {this.renderProcesses()}
                 </ListGroup>
-                <br/>
-                <br/>
+                <br />
+                <br />
                 <h2>Versions</h2>
                 <br />
                 <ListGroup>
                     {this.renderVersionsOfApp()}
                 </ListGroup>
-                <br/>
-                <br/>
+                <br />
+                <br />
                 <Row>
                     <Container>
                         <Button outline size="lg" color="primary" onClick={this.toggle} style={{ marginBottom: '1rem' }}>New test</Button>
@@ -364,8 +406,8 @@ export default class ApplicationDetail extends Component {
 
                 <Collapse isOpen={this.state.collapseTwo}>
                     <Card>
-                         <AddNewVersion application={app} appKey={this.state.appKey} /> 
-                         {/*
+                        <AddNewVersion application={app} appKey={this.state.appKey} />
+                        {/*
                             Version Name
                             <Input
                                 name="versionName"
@@ -382,11 +424,11 @@ export default class ApplicationDetail extends Component {
 
                 <Collapse isOpen={this.state.collapseThree}>
                     <Card>
-                        <Vrtscreen application={app}  />
+                        <Vrtscreen application={app} projectId={this.state.appKey} />
                     </Card>
                 </Collapse>
-                <br/>
-                <br/>
+                <br />
+                <br />
             </Container>
         )
     }

@@ -83,6 +83,7 @@ class Database {
   }
 
   saveProcess(process) {
+    console.log('lo que LLEGA', process)
     const refPush = `projects/${process.projectId}/versions/${process.versionKey}/process`;
     console.log(`ruta para push ${refPush}`);
     let dbProcess = {
@@ -109,6 +110,18 @@ class Database {
         state: 'Sent',
         type: 'BDT'
       }
+    }
+    else if (process.queue === 'vrt') {
+      console.log('vrttt');
+      dbProcess = {
+        "versionOneId": process.versionOneId,
+        "versionTwoId": process.versionTwoId,
+        "processOneId": process.processOneId,
+        "processTwoId": process.processTwoId,
+        state: 'Sent'
+      }
+      return db.ref(`projects/${process.projectId}/vrt`).push(dbProcess).key;
+
     }
     return db.ref(refPush).push(dbProcess).key;
   }

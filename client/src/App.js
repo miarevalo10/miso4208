@@ -16,6 +16,7 @@ import {
   NavItem,
   NavLink,
 } from 'reactstrap';
+import VRTReport from './screens/vrt/VRTReport';
 
 
 class App extends Component {
@@ -62,6 +63,7 @@ class App extends Component {
         <Route path="/sendmessage" component={Home} />
         <Route path="/new-test" component={NewTestRun} />
         <Route path="/create-application" component={CreateApplication} />
+        <Route path="/vrt-report" component={VRTReport} />
       </Router>
     );
   }

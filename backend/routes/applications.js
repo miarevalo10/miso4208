@@ -10,7 +10,7 @@ router.use(function timeLog(req, res, next) {
 
 router.get('/', function (req, res) {
     //console.log("get all applications");
-    db.getApplications((data)=>{
+    db.getApplications((data) => {
         console.log(data.val())
         return res.status(200).send(data.val());
     });
@@ -18,15 +18,96 @@ router.get('/', function (req, res) {
 
 router.post("/addVersion", (req, res) => {
     console.log('add version', req.body);
-    db.saveVersion(req.body.projectId,req.body.version).then(response => {
+    db.saveVersion(req.body.projectId, req.body.version).then(response => {
         return res.status(200).send(response);
-      }).catch(error => {
+    }).catch(error => {
         console.log(error)
         console.log('error en back', error)
         return res.status(400).send(error);
-      });
+    });
 
 });
+
+router.get("/vrtReport", (req, res) => {
+    const exampleJson = [
+        {
+            name: 'Feature 1',
+            scenarios: [
+                {
+                    name: 'Scenario 1',
+                    screenshotsV1: [
+                        {
+                            name: '000Given I go to administration panel.png',
+                            url: 'https://s3-us-west-2.amazonaws.com/pruebas-autom/cypress/-LbQxpuXbI9dVHD83BjD/process/-LdV5bXOZ8wCPYK-w7br/screenshots/create_survey.feature/Create+a+survey/000Given+I+go+to+administration+panel.png'
+                        },
+                        {
+                            name: '000Given I go to administration panel.png',
+                            url: 'https://s3-us-west-2.amazonaws.com/pruebas-autom/cypress/-LbQxpuXbI9dVHD83BjD/process/-LdV5bXOZ8wCPYK-w7br/screenshots/create_survey.feature/Create+a+survey/000Given+I+go+to+administration+panel.png'
+                        }
+                    ],
+                    screenshotsV2: [
+                        {
+                            name: '000Given I go to administration panel.png',
+                            url: 'https://s3-us-west-2.amazonaws.com/pruebas-autom/cypress/-LbQxpuXbI9dVHD83BjD/process/-LdV5bXOZ8wCPYK-w7br/screenshots/create_survey.feature/Create+a+survey/000Given+I+go+to+administration+panel.png'
+                        },
+                        {
+                            name: '000Given I go to administration panel.png',
+                            url: 'https://s3-us-west-2.amazonaws.com/pruebas-autom/cypress/-LbQxpuXbI9dVHD83BjD/process/-LdV5bXOZ8wCPYK-w7br/screenshots/create_survey.feature/Create+a+survey/000Given+I+go+to+administration+panel.png'
+                        }
+                    ],
+                    diff: [
+                        {
+                            name: '000Given I go to administration panel.png',
+                            url: 'https://s3-us-west-2.amazonaws.com/pruebas-autom/cypress/-LbQxpuXbI9dVHD83BjD/process/-LdV5bXOZ8wCPYK-w7br/screenshots/create_survey.feature/Create+a+survey/000Given+I+go+to+administration+panel.png'
+                        },
+                        {
+                            name: '000Given I go to administration panel.png',
+                            url: 'https://s3-us-west-2.amazonaws.com/pruebas-autom/cypress/-LbQxpuXbI9dVHD83BjD/process/-LdV5bXOZ8wCPYK-w7br/screenshots/create_survey.feature/Create+a+survey/000Given+I+go+to+administration+panel.png'
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            name: 'Feature 2',
+            scenarios: [
+                {
+                    name: 'Scenario 1',
+                    screenshotsV1: [
+                        {
+                            name: '000Given I go to administration panel.png',
+                            url: 'https://s3-us-west-2.amazonaws.com/pruebas-autom/cypress/-LbQxpuXbI9dVHD83BjD/process/-LdV5bXOZ8wCPYK-w7br/screenshots/create_survey.feature/Create+a+survey/000Given+I+go+to+administration+panel.png'
+                        },
+                        {
+                            name: '000Given I go to administration panel.png',
+                            url: 'https://s3-us-west-2.amazonaws.com/pruebas-autom/cypress/-LbQxpuXbI9dVHD83BjD/process/-LdV5bXOZ8wCPYK-w7br/screenshots/create_survey.feature/Create+a+survey/000Given+I+go+to+administration+panel.png'
+                        }
+                    ],
+                    screenshotsV2: [
+                        {
+                            name: '000Given I go to administration panel.png',
+                            url: 'https://s3-us-west-2.amazonaws.com/pruebas-autom/cypress/-LbQxpuXbI9dVHD83BjD/process/-LdV5bXOZ8wCPYK-w7br/screenshots/create_survey.feature/Create+a+survey/000Given+I+go+to+administration+panel.png'
+                        },
+                        {
+                            name: '000Given I go to administration panel.png',
+                            url: 'https://s3-us-west-2.amazonaws.com/pruebas-autom/cypress/-LbQxpuXbI9dVHD83BjD/process/-LdV5bXOZ8wCPYK-w7br/screenshots/create_survey.feature/Create+a+survey/000Given+I+go+to+administration+panel.png'
+                        }
+                    ],
+                    diff: [
+                        {
+                            name: '000Given I go to administration panel.png',
+                            url: 'https://s3-us-west-2.amazonaws.com/pruebas-autom/cypress/-LbQxpuXbI9dVHD83BjD/process/-LdV5bXOZ8wCPYK-w7br/screenshots/create_survey.feature/Create+a+survey/000Given+I+go+to+administration+panel.png'
+                        },
+                        {
+                            name: '000Given I go to administration panel.png',
+                            url: 'https://s3-us-west-2.amazonaws.com/pruebas-autom/cypress/-LbQxpuXbI9dVHD83BjD/process/-LdV5bXOZ8wCPYK-w7br/screenshots/create_survey.feature/Create+a+survey/000Given+I+go+to+administration+panel.png'
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+})
 
 router.post("/create", (req, res) => {
     console.log('sendtest reqbody', req.body);
@@ -79,16 +160,16 @@ router.post("/create", (req, res) => {
         const projectId = db.saveApplication(application);
         //const projectId = ref.key();
         console.log('PROJECT ID', projectId);
-        db.saveVersion(projectId,versions[0]).then(response => {
+        db.saveVersion(projectId, versions[0]).then(response => {
             //console.log('response en back', response);
             application.projectId = projectId;
             return res.status(200).send(application);
-          }).catch(error => {
+        }).catch(error => {
             console.log(error)
             console.log('error en back', error)
             return res.status(400).send(error);
-      
-          });
+
+        });
     } else {
         console.log(err);
         return res.status(400).send(err);

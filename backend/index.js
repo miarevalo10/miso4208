@@ -8,16 +8,20 @@ const multiparty = require('multiparty');
 const applications = require('./routes/applications');
 var AWS = require('aws-sdk');
 let db = require('./database');
-
+const dotenv = require('dotenv');
 const API_PORT = 3001;
 const app = express();
 const router = express.Router();
+
+dotenv.config();
 
 AWS.config.update({
     region: 'us-west-2',
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
+
+
 AWS.config.setPromisesDependency(bluebird);
 var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 const s3 = new AWS.S3();
@@ -38,7 +42,7 @@ app.use(allowCrossDomain);
 app.use('/applications', applications);
 
 router.post("/sendTest", (req, res) => {
-    console.log('sendtest', req.body);
+    //console.log('sendtest', req.body);
     var msg = {};
     var queue = "";
     const processId = db.saveProcess(req.body);
@@ -88,10 +92,12 @@ router.post("/sendTest", (req, res) => {
             break;
         case "vrt":
             msg = {
-                "versionOneId": req.body.versionOne,
-                "versionTwoId": req.body.versionTwo,
-                "processOneId": req.body.processOne,
-                "processTwoId": req.body.processTwo,
+                "versionOneId": req.body.versionOneId,
+                "versionTwoId": req.body.versionTwoId,
+                "processOneId": req.body.processOneId,
+                "processTwoId": req.body.processTwoId,
+                "projectId" : req.body.projectId,
+                "vrtProcessId": processId
             }
             queue = process.env.SQS_VRT;
             break;
@@ -133,8 +139,8 @@ router.post("/apk-upload", (request, response) => {
     form.parse(request, async (error, fields, files) => {
         if (error) throw new Error(error);
         try {
-            console.log('FILESSSS', files)
-            console.log('headers', files.file[0].headers, files.file[0].headers['content-type']);
+            //console.log('FILESSSS', files)
+            //console.log('headers', files.file[0].headers, files.file[0].headers['content-type']);
 
             const path = files.file[0].path;
             const buffer = fs.readFileSync(path);
@@ -185,7 +191,7 @@ router.get("/get-apks", (req, res) => {
         Delimiter: "/",
         MaxKeys: 3
     };
-    console.log("ok " + process.env.AWS_ACCESS_KEY_ID + " - " + process.env.AWS_SECRET_ACCESS_KEY);
+   // console.log("ok " + process.env.AWS_ACCESS_KEY_ID + " - " + process.env.AWS_SECRET_ACCESS_KEY);
     s3.listObjects(params, function (err, data) {
         if (err) {
             console.log(err, err.stack);
@@ -216,7 +222,7 @@ router.get("/get-screenshots", (req, res) => {
             console.log(err, err.stack);
             return res.status(400).send(err);
         } else {
-            console.log(data);
+            //console.log(data);
             return res.status(200).send(data);
         }
     });
@@ -235,7 +241,7 @@ router.get("/get-script-cypress", (req, res) => {
             console.log(err, err.stack);
             return res.status(400).send(err);
         } else {
-            console.log(data);
+          //  console.log(data);
             return res.status(200).send(data);
         }
     });
