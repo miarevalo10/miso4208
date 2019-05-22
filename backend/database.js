@@ -137,6 +137,19 @@ class Database {
     return db.ref('projects/' + projectId + "/versions/" + versionId + "/process/" + processId)
   }
 
+  getVrtProcess(projectId, processId) {
+    console.log('VRT PROCESS', 'projects/' + projectId + "/vrt/"+ processId)
+
+    return db.ref('projects/' + projectId + "/vrt/"+ processId)
+  }
+
+  updateVrtProcess(projectId,  processId, pstate) {
+    let processStr = `projects/${projectId}/vrt/${processId}`;
+    console.log('update process', processStr);
+
+    db.ref().child(processStr).update({ 'state': pstate, 'lastUpdate': new Date() }).then().catch();
+  }
+
   getApplications(callback) {
     return db.ref('projects/').once('value').then((snapshot) => {
       callback(snapshot)

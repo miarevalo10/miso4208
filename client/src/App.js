@@ -18,6 +18,8 @@ import {
 } from 'reactstrap';
 import VRTReport from './screens/vrt/VRTReport';
 
+import vrtTable from './screens/vrt/vrtTable';
+
 
 class App extends Component {
 
@@ -64,6 +66,8 @@ class App extends Component {
         <Route path="/new-test" component={NewTestRun} />
         <Route path="/create-application" component={CreateApplication} />
         <Route path="/vrt-report" component={VRTReport} />
+        <Route path="/vrt-scenario" component={vrtTable} />
+
       </Router>
     );
   }

@@ -31,3 +31,37 @@
     transform: rotate(360deg);
   }
 }
+
+.item {
+  cursor: pointer;
+  padding: 0.4cm;
+  margin-top: 0.3cm;
+  border: none;
+}
+
+.featureCard {
+  cursor: pointer;
+  padding: 0.4cm;
+  margin-top: 0.3cm;
+}
+
+.scenarioTitle {
+  margin-left: 0.5cm;
+  margin-top: 0.5cm;
+  font-size: 1.3em;
+  font-weight: 500;
+}
+.featureTitle {
+
+  font-size: 1.3em;
+  font-weight: 500;
+}
+
+.scenario {
+  border: none;
+}
+
+.stepImg {
+  max-width:80%;
+  max-height:80%;
+}

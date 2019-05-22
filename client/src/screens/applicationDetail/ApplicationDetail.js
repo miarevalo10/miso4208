@@ -153,60 +153,55 @@ export default class ApplicationDetail extends Component {
 
     }
 
-    renderVRT = (process, key) => {
-        const { state } = process;
+    renderVRT = () => {
+        const { vrt } = this.state.application;
 
-        var stateHTML;
-        var color;
-        if (state) {
-            stateHTML = <span>State: {process.state} </span>
-            if (state === "Terminated" || state === "Finished") {
-                color = "success";
-                var report = <Link to={{
-                    pathname: '/vrt-report',
-                    state: {
-                        appKey: this.state.appKey,
-                        vrtKey: key
-                    }
-                }}>
-                    See report
+        return _.map(vrt, (value, key) => {
+            const { state, versionOneId, versionTwoId} = value;
+            const process = value;
+            var stateHTML;
+            var color;
+            console.log(' Process ', process);
+            if (state) {
+                stateHTML = <span>State: {process.state} </span>
+                if (state === "Terminated" || state === "Finished") {
+                    color = "success";
+                    var report = <Link to={{
+                        pathname: '/vrt-report',
+                        state: {
+                            process: process
+                        }
+                    }}>
+                        See report
                 </Link>
 
-            } else if (state === "Running" || state === "In progress") {
-                color = "info"
-            } else if (state === "Sent") {
-                color = "warning"
-            } else if (state === "Failed") {
-                color = "danger"
+                } else if (state === "Running" || state === "In progress") {
+                    color = "info"
+                } else if (state === "Sent") {
+                    color = "warning"
+                } else if (state === "Failed") {
+                    color = "danger"
+                }
             }
-        }
-        return <ListGroupItem key={key} color={color}>
-            <ListGroupItemHeading>BDT testing</ListGroupItemHeading>
-            <ListGroupItemText>
-                {report}
-                -
+            return <ListGroupItem key={key} color={color}>
+                <ListGroupItemHeading>VRT Testing</ListGroupItemHeading>
+                <ListGroupItemText>
+                    {report}
+                    -
                 {stateHTML}
-            </ListGroupItemText>
-        </ListGroupItem>
+                {/* Version1: {versionOneId}
+                Version2: {versionTwoId} */}
+                </ListGroupItemText>
+            </ListGroupItem>
+        }
 
+        )
     }
 
-    renderProcesses = () => {
-        console.log('application',this.state.application);
-        // const { process } = this.state.application;
-        // if (process) {
-        //     return _.map(process, (value, key) => {
-        //         if (value.type.toLowerCase() === 'random') {
-        //             return this.renderMonkey(value, key)
-        //         } else if (value.type.toLowerCase() === 'bdt' || value.type.toLowerCase() === 'calabash') {
-        //             return this.renderBDT(value, key)
-        //         } else {
-        //             return <ListGroupItem key={key}>
-        //             </ListGroupItem>
-        //         }
 
-        //     })
-        // }
+    renderProcesses = () => {
+        console.log('application', this.state.application);
+
         const { versions } = this.state.application;
         if (versions) {
             return _.map(versions, (version, key) => {
@@ -240,6 +235,7 @@ export default class ApplicationDetail extends Component {
                 })
             })
         }
+
 
 
     }
@@ -377,6 +373,7 @@ export default class ApplicationDetail extends Component {
                 <br />
                 <ListGroup>
                     {this.renderProcesses()}
+                    {this.renderVRT()}
                 </ListGroup>
                 <br />
                 <br />

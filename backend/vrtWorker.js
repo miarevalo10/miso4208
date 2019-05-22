@@ -25,10 +25,9 @@ AWS.config.update({ region: 'us-west-2' });
 var s3 = new AWS.S3();
 var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 const basePath = './vrt/';
-const featuresFile = 'features.zip';
-var cont = 0;
-const BUCKET_NAME = 'pruebas-autom'
+const BUCKET_NAME = 'pruebas-autom';
 const FOLDER_S3 = 'cypress/'
+const URL_S3 = 'https://s3-us-west-2.amazonaws.com/' + BUCKET_NAME + "/"
 
 /**
  * Msg example expected from queue
@@ -48,8 +47,7 @@ const examplejson = {
 
 const report = [];
 imgKeys = [];
-//launchEmulator();
-//createVRTFolder();
+promises = [];
 
 //var t = setInterval(rcvMsg, 2000);
 
@@ -74,6 +72,7 @@ function rcvMsg() {
 runVrt(examplejson);
 
 function runVrt(testObj) {
+    // db.updateVrtProcess(testObj.projectId, testObj.vrtProcessId, 'In progress');
     createVRTFolder();
     listFeatures(testObj);
 }
@@ -102,8 +101,8 @@ function listFeatures(data) {
                 }
             });
             buildJson(testData);
-            compareAllImages();
-            
+            compareAllImages(testData);
+
         }
     });
 }
@@ -146,7 +145,7 @@ function buildJson(data) {
 
 async function compareAllImages(test) {
 
-    report.forEach(feature => {
+    await report.forEach(feature => {
 
         if (!fs.existsSync(feature.name)) {
             fs.mkdirSync(feature.name);
@@ -173,7 +172,7 @@ async function compareAllImages(test) {
                     await downloadImage(screenshot.v1, `${feature.name}/${scenario.name}/${name}/v1-${screenshot.name}`);
                     await downloadImage(screenshot.v2, `${feature.name}/${scenario.name}/${name}/v2-${screenshot.name}`);
                     getDiff(img1Path, img2Path, diffPath, screenshot.diff);
-                }               
+                }
 
                 downloadImages();
 
@@ -183,8 +182,10 @@ async function compareAllImages(test) {
             shell.cd('..');
         });
         shell.cd('..');
-
     });
+
+    console.log('Test finished!!!');
+    updateTerminatedProcess(test);
 }
 
 function downloadImage(key, imgName) {
@@ -194,11 +195,10 @@ function downloadImage(key, imgName) {
         Key: key
     };
 
-
     return new Promise((resolve, reject) => s3.getObject(params, (err, data) => {
-        if (err)  {
+        if (err) {
             reject(err);
-        } 
+        }
         else {
             fs.writeFileSync(imgName, data.Body);
             resolve(data);
@@ -233,10 +233,10 @@ async function getDiff(img1, img2, output, s3key) {
     );
     fs.writeFileSync(output, data.getBuffer());
 
-    uploadFile(output, s3key, 'image/png');
+    promises.push(uploadFile(output, s3key, 'image/png'));
 }
 
-function uploadFile(file, s3key, contentType) {
+var uploadFile = function (file, s3key, contentType) {
     fs.readFile(file, function (err, data) {
         if (err) { throw err; }
         var params = {
@@ -247,13 +247,16 @@ function uploadFile(file, s3key, contentType) {
             ACL: 'public-read'
         };
 
-        s3.putObject(params, function (err, data) {
-            if (err) {
-                console.log(err)
-            } else {
-                console.log("Successfully uploaded data ", s3key);
-            }
+        return new Promise((resolve, reject) => {
+            s3.putObject(params, function (err, data) {
+                if (err) {
+                    reject(err);
+                } else {
+                    //console.log("Successfully uploaded data ", s3key);
+                    resolve(data);
+                }
 
+            });
         });
 
     });
@@ -272,6 +275,13 @@ function deleteMessage() {
             console.log("Message Deleted", data);
         }
     });
+}
+
+function updateTerminatedProcess(data) {
+    let process = db.getVrtProcess(data.projectId, data.vrtProcessId);
+    console.log('udpate terminated process');
+    process.child('report').set(URL_S3 + `cypress/${data.projectId}/vrt/${data.vrtProcessId}/report.json`)
+    process.update({ state: "Terminated" })
 }
 
 
