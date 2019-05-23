@@ -5,13 +5,20 @@ var shell = require('shelljs');
 var AdmZip = require('adm-zip');
 let db = require('./database');
 const uuidv1 = require('uuid/v1')
+const dotenv = require('dotenv');
+dotenv.config();
 
-AWS.config.update({ region: 'us-west-2' });
+AWS.config.update({
+  region: 'us-west-2',
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+});
+
 var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 var s3 = new AWS.S3();
 
 const basePath = './cypress/'
-const cypressConfig = '/cypress.json'
+const cypressConfig = './cypress.json'
 const FEATURE_TOKEN = "Feature:"
 const URL_FRONT = 'http://localhost:5000/'
 const SCREENSHOTS_FOLDER = basePath + 'screenshots/'
@@ -28,7 +35,6 @@ var params = {
 };
 
 var receiptHandle = "";
-const basePath = './cypress/';
 
 /**
  * Msg example expected from queue
@@ -44,6 +50,8 @@ const rcvMsg = () => {
         var test = data.Messages[0].Body;
         console.log('msg rcv', JSON.parse(test));
         receiptHandle = data.Messages[0].ReceiptHandle;
+        testObj = JSON.parse(test);
+        db.updateProcess(testObj.projectId,testObj.versionId,testObj.processId,'In progress');
         downloadFile(JSON.parse(test));
       } else {
         console.log('no new msgs');
@@ -71,7 +79,8 @@ const downloadFile = (data) => {
   console.log('data', data);
   var params = {
     Bucket: BUCKET_NAME,
-    Key: FOLDER_S3 + data.testingSet
+    //Key: FOLDER_S3 + data.testingSet
+    Key: 'cypress/cucumber-cypress.zip'
   };
 
   if (!fs.existsSync(basePath)) {
@@ -100,12 +109,16 @@ function unzipFile(data) {
   }
   var zip = new AdmZip(filePath);
   zip.extractAllTo(basePath, true);
+  console.log('File correctly unzipped')
 }
 
 function runTestingSet(data) {
   shell.cd(basePath + data.project)
   shell.exec('npm i')
+  console.log('after npm i')
   addReportConfiguration(data)
+  console.log('after report conf')
+
   replaceCypressCucumbreLibrary()
   //cleanProject()
   shell.exec('npx cypress run .').output
@@ -131,7 +144,7 @@ function cleanProject() {
 }
 
 function addReportConfiguration(data) {
-  let cypressConfigFile = "." + cypressConfig
+  let cypressConfigFile =  cypressConfig
   let contenido = fs.readFileSync(cypressConfigFile)
   let cypress_cfg = JSON.parse(contenido)
   cypress_cfg.reporter = "mochawesome"
@@ -140,7 +153,8 @@ function addReportConfiguration(data) {
     overwrite: false,
     html: false,
     json: true
-  }
+  };
+  console.log(cypressConfigFile)
   fs.writeFileSync(cypressConfigFile, JSON.stringify(cypress_cfg, null, 4))
   shell.exec('npm install --save-dev mocha@5.2.0 mochawesome@3.1.1')
   shell.exec('npm install --save-dev mochawesome-merge mochawesome-report-generator')
@@ -220,14 +234,14 @@ function changeResultsContextAndFolders(dir, lstFiles, data, includeDetail = fal
 }
 
 function s3Path(data) {
-  return FOLDER_S3 + data.projectId + "/process/" + data.processId + "/"
+  return FOLDER_S3 + data.projectId +"/versions/"+data.versionId +"/process/" + data.processId + "/"
 }
 
 function updateProcess(data) {
   let content = fs.readFileSync('mochawesome_db.json')
   let result = JSON.parse(content)
 
-  let process = db.getProcess(data.projectId, data.processId)
+  let process = db.getProcess(data.projectId, data.versionId,data.processId)
   process.child('result').set(result)
   process.child('report').set(URL_S3 + s3Path(data) + REPORTS_FOLDER.replace(basePath, "") + 'index.html')
   process.update({ state: "Terminated" })

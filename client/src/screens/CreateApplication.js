@@ -4,12 +4,11 @@ import {
     FormGroup, Label, Input,
     Button, FormText, FormFeedback,
     Row, InputGroupAddon, InputGroup,
-    ListGroup, ListGroupItem
+    ListGroup, ListGroupItem, Alert
 } from 'reactstrap';
 import { Redirect } from 'react-router-dom';
 
 import axios from "axios";
-import FileUpload from './FileUpload';
 
 export default class CreateApplication extends Component {
 
@@ -42,11 +41,18 @@ export default class CreateApplication extends Component {
             },
             file: null,
             success: false,
-            message: ""
+            message: "",
+            visible:false
         }
         this.handleChange = this.handleChange.bind(this);
         this.isEmpty = this.isEmpty.bind(this);
+        this.onDismiss = this.onDismiss.bind(this);
+       
     }
+
+    onDismiss() {
+        this.setState({ visible: false });
+      }
 
     validateName = (e) => {
         const { validate } = this.state
@@ -117,30 +123,35 @@ export default class CreateApplication extends Component {
     }
 
     submitFile = () => {
-        //event.preventDefault();
-        const formData = new FormData();
-        //                'Content-Type': 'multipart/form-data'
 
-        formData.append('file', this.state.file[0]);
-        formData.append('timestamp', new Date())
-        axios.post("http://localhost:3001/api/apk-upload", formData, {
-            headers: {
-                'Content-Type': 'application/apk'
+        if(this.state.type !== "web"){
+            if(this.state.file === null){
+                this.setState({visible:true, message: "You must upload a file!"});
+                return;
             }
-        }).then(response => {
-            console.log('res fileupload', response)
-
-            this.setState({
-                success: true,
-                message: "File upload succesfully"
+            const formData = new FormData();
+            formData.append('file', this.state.file[0]);
+            formData.append('timestamp', new Date())
+            axios.post("http://localhost:3001/api/apk-upload", formData, {
+                headers: {
+                    'Content-Type': 'application/apk'
+                }
+            }).then(response => {
+                console.log('res fileupload', response)
+    
+                this.setState({
+                    success: true,
+                    message: "File upload succesfully"
+                });
+            }).catch(error => {
+                console.log(error)
+                this.setState({
+                    success: true,
+                    message: error.message,
+                    visible:true
+                });
             });
-        }).catch(error => {
-            console.log(error)
-            this.setState({
-                success: true,
-                message: error.message
-            });
-        });
+        }
     }
 
     handleFileUpload = (event) => {
@@ -177,7 +188,7 @@ export default class CreateApplication extends Component {
             console.log('rerror', error)
             this.setState({
                 success: true,
-                message: error.message
+                message: "The fields are invalid or the internet conection is not good enough"
             });
         });
     }
@@ -375,6 +386,9 @@ export default class CreateApplication extends Component {
             applicationLanguage } = this.state;
         return (
             <Container className="App">
+            <Alert color="info" isOpen={this.state.visible} toggle={this.onDismiss}>
+                {this.state.message}
+            </Alert>
                 <h2>Create Application</h2>
                 <Form className="form" onSubmit={(e) => this.submitForm(e)}>
                     <Col>

@@ -36,7 +36,9 @@ function rcvMsg() {
         var test = data.Messages[0].Body;
         console.log('msg rcv', JSON.parse(test));
         receiptHandle = data.Messages[0].ReceiptHandle;
-        downloadApk(JSON.parse(test));
+        var testObj = JSON.parse(test);
+        db.updateProcess(testObj.projectId,testObj.versionId ,testObj.processId, 'In progress');
+        downloadApk(testObj);
       } else {
         console.log('no new msgs');
       }
@@ -44,8 +46,6 @@ function rcvMsg() {
   });
 }
 const downloadApk = (test) => {
-  let process = db.getProcess(test.projectId, test.processId)
-  process.update({ state: "In execution" })
 
   var params = {
     Bucket: 'pruebas-autom',
@@ -70,9 +70,9 @@ const downloadApk = (test) => {
 const downloadFeatures = (test) => {
   var params = {
     Bucket: 'pruebas-autom',
-    Key: 'calabash/' + test.testingSet
+    Key: 'scripts/' + test.testingSet
   };
-  console.log('keyyyy', params.Key);
+  console.log('key', params.Key);
   if (!fs.existsSync(basePath)) {
     fs.mkdirSync(basePath);
   }
@@ -120,14 +120,14 @@ function uploadImages(test) {
 }
 
 function updateProcess(data) {
-  let process = db.getProcess(data.projectId, data.processId)
-  process.child('report').set(URL_S3 + s3Path(data) + 'report.html')
-  process.update({ state: "Terminated" })
+  let process = db.getProcess(data.projectId,data.versionId ,data.processId);
+  process.child('report').set(URL_S3 + s3Path(data) + 'report.html');
+  db.updateProcess(data.projectId,data.versionId ,data.processId, 'Terminated');
   console.log(`Process ${data.processId} terminated`);
 }
 
 function s3Path(data) {
-  return FOLDER_S3 + data.projectId + "/process/" + data.processId + "/"
+  return FOLDER_S3 + data.projectId + "/version/"+data.versionId +"/process/" + data.processId + "/"
 }
 
 function uploadFileToS3(filePath, s3Path, contentType) {

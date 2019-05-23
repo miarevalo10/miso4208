@@ -1,0 +1,335 @@
+  bash arg: -p
+  bash arg: me.kuehle.carreport
+  bash arg: -s
+  bash arg: 26869
+  bash arg: -v
+  bash arg: 100
+:Monkey: seed=26869 count=100
+:AllowPackage: me.kuehle.carreport
+:IncludeCategory: android.intent.category.LAUNCHER
+:IncludeCategory: android.intent.category.MONKEY
+// Event percentages:
+//   0: 15.0%
+//   1: 10.0%
+//   2: 2.0%
+//   3: 15.0%
+//   4: -0.0%
+//   5: -0.0%
+//   6: 25.0%
+//   7: 15.0%
+//   8: 2.0%
+//   9: 2.0%
+//   10: 1.0%
+//   11: 13.0%
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=me.kuehle.carreport/.gui.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=me.kuehle.carreport/.gui.MainActivity } in package me.kuehle.carreport
+:Sending Touch (ACTION_DOWN): 0:(349.0,1516.0)
+:Sending Touch (ACTION_UP): 0:(350.6098,1497.2109)
+:Sending Trackball (ACTION_MOVE): 0:(-2.0,2.0)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,1.0)
+:Sending Touch (ACTION_DOWN): 0:(325.0,1530.0)
+:Sending Touch (ACTION_UP): 0:(328.52612,1530.2255)
+:Sending Trackball (ACTION_MOVE): 0:(-5.0,-4.0)
+:Sending Touch (ACTION_DOWN): 0:(536.0,1342.0)
+:Sending Touch (ACTION_UP): 0:(530.6917,1332.6544)
+:Sending Touch (ACTION_DOWN): 0:(315.0,2036.0)
+:Sending Touch (ACTION_UP): 0:(322.4031,2036.3647)
+:Sending Touch (ACTION_DOWN): 0:(686.0,691.0)
+:Sending Touch (ACTION_UP): 0:(698.5051,636.91315)
+:Sending Touch (ACTION_DOWN): 0:(890.0,1275.0)
+:Sending Touch (ACTION_UP): 0:(893.9728,1295.8778)
+:Sending Trackball (ACTION_MOVE): 0:(-2.0,4.0)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,4.0)
+Events injected: 100
+:Sending rotation degree=0, persist=false
+:Dropped: keys=0 pointers=0 trackballs=0 flips=0 rotations=0
+## Network stats: elapsed time=609ms (0ms mobile, 0ms wifi, 609ms not connected)
+// Monkey finished
+  bash arg: -p
+  bash arg: me.kuehle.carreport
+  bash arg: -s
+  bash arg: 39401
+  bash arg: -v
+  bash arg: 100
+:Monkey: seed=39401 count=100
+:AllowPackage: me.kuehle.carreport
+:IncludeCategory: android.intent.category.LAUNCHER
+:IncludeCategory: android.intent.category.MONKEY
+// Event percentages:
+//   0: 15.0%
+//   1: 10.0%
+//   2: 2.0%
+//   3: 15.0%
+//   4: -0.0%
+//   5: -0.0%
+//   6: 25.0%
+//   7: 15.0%
+//   8: 2.0%
+//   9: 2.0%
+//   10: 1.0%
+//   11: 13.0%
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=me.kuehle.carreport/.gui.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=me.kuehle.carreport/.gui.MainActivity } in package me.kuehle.carreport
+:Sending Touch (ACTION_DOWN): 0:(684.0,775.0)
+:Sending Touch (ACTION_UP): 0:(713.6491,876.2571)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,2.0)
+:Sending Touch (ACTION_DOWN): 0:(114.0,1850.0)
+:Sending Touch (ACTION_UP): 0:(116.65147,1862.7578)
+:Sending Trackball (ACTION_MOVE): 0:(-5.0,4.0)
+:Sending Touch (ACTION_DOWN): 0:(529.0,1539.0)
+:Sending Touch (ACTION_UP): 0:(523.9276,1551.1542)
+:Sending Touch (ACTION_DOWN): 0:(175.0,190.0)
+:Sending Touch (ACTION_UP): 0:(171.6267,194.397)
+:Sending Touch (ACTION_DOWN): 0:(786.0,185.0)
+:Sending Touch (ACTION_UP): 0:(809.74457,138.24274)
+:Sending Touch (ACTION_DOWN): 0:(232.0,1586.0)
+:Sending Touch (ACTION_UP): 0:(248.78163,1612.1902)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,-5.0)
+:Sending Touch (ACTION_DOWN): 0:(9.0,177.0)
+Events injected: 100
+:Sending rotation degree=0, persist=false
+:Dropped: keys=0 pointers=0 trackballs=0 flips=0 rotations=0
+## Network stats: elapsed time=1350ms (0ms mobile, 0ms wifi, 1350ms not connected)
+// Monkey finished
+  bash arg: -p
+  bash arg: me.kuehle.carreport
+  bash arg: -s
+  bash arg: 67273
+  bash arg: -v
+  bash arg: 100
+:Monkey: seed=67273 count=100
+:AllowPackage: me.kuehle.carreport
+:IncludeCategory: android.intent.category.LAUNCHER
+:IncludeCategory: android.intent.category.MONKEY
+// Event percentages:
+//   0: 15.0%
+//   1: 10.0%
+//   2: 2.0%
+//   3: 15.0%
+//   4: -0.0%
+//   5: -0.0%
+//   6: 25.0%
+//   7: 15.0%
+//   8: 2.0%
+//   9: 2.0%
+//   10: 1.0%
+//   11: 13.0%
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=me.kuehle.carreport/.gui.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=me.kuehle.carreport/.gui.MainActivity } in package me.kuehle.carreport
+:Sending Touch (ACTION_DOWN): 0:(583.0,33.0)
+:Sending Touch (ACTION_UP): 0:(641.96625,0.0)
+:Sending Touch (ACTION_DOWN): 0:(104.0,1336.0)
+:Sending Touch (ACTION_UP): 0:(136.84795,1365.1378)
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,1.0)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,4.0)
+:Sending Touch (ACTION_DOWN): 0:(726.0,832.0)
+:Sending Touch (ACTION_UP): 0:(718.0244,829.57715)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,4.0)
+:Sending Touch (ACTION_DOWN): 0:(453.0,104.0)
+:Sending Touch (ACTION_UP): 0:(453.6739,119.48652)
+:Sending Touch (ACTION_DOWN): 0:(174.0,1129.0)
+:Sending Touch (ACTION_UP): 0:(174.77711,1123.9447)
+:Sending Touch (ACTION_DOWN): 0:(739.0,631.0)
+:Sending Touch (ACTION_UP): 0:(737.68195,612.4032)
+:Sending Touch (ACTION_DOWN): 0:(927.0,793.0)
+:Sending Touch (ACTION_UP): 0:(938.30133,794.313)
+:Sending Touch (ACTION_DOWN): 0:(373.0,1904.0)
+:Sending Touch (ACTION_UP): 0:(373.4228,1909.0916)
+:Sending Touch (ACTION_DOWN): 0:(435.0,381.0)
+:Sending Touch (ACTION_UP): 0:(442.98868,376.32376)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,-5.0)
+Events injected: 100
+:Sending rotation degree=0, persist=false
+:Dropped: keys=0 pointers=0 trackballs=0 flips=0 rotations=0
+## Network stats: elapsed time=291ms (0ms mobile, 0ms wifi, 291ms not connected)
+// Monkey finished
+  bash arg: -p
+  bash arg: me.kuehle.carreport
+  bash arg: -s
+  bash arg: 63611
+  bash arg: -v
+  bash arg: 222
+:Monkey: seed=63611 count=222
+:AllowPackage: me.kuehle.carreport
+:IncludeCategory: android.intent.category.LAUNCHER
+:IncludeCategory: android.intent.category.MONKEY
+// Event percentages:
+//   0: 15.0%
+//   1: 10.0%
+//   2: 2.0%
+//   3: 15.0%
+//   4: -0.0%
+//   5: -0.0%
+//   6: 25.0%
+//   7: 15.0%
+//   8: 2.0%
+//   9: 2.0%
+//   10: 1.0%
+//   11: 13.0%
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=me.kuehle.carreport/.gui.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=me.kuehle.carreport/.gui.MainActivity } in package me.kuehle.carreport
+:Sending Trackball (ACTION_MOVE): 0:(4.0,-2.0)
+:Sending Touch (ACTION_DOWN): 0:(942.0,1446.0)
+:Sending Touch (ACTION_UP): 0:(954.08746,1443.392)
+:Sending Touch (ACTION_DOWN): 0:(175.0,706.0)
+:Sending Touch (ACTION_UP): 0:(175.29063,705.67554)
+:Sending Touch (ACTION_DOWN): 0:(903.0,896.0)
+:Sending Touch (ACTION_UP): 0:(910.938,892.12494)
+:Sending Touch (ACTION_DOWN): 0:(14.0,1831.0)
+:Sending Touch (ACTION_UP): 0:(12.1014385,1829.113)
+:Sending Touch (ACTION_DOWN): 0:(809.0,738.0)
+:Sending Touch (ACTION_UP): 0:(745.14465,656.1739)
+:Sending Touch (ACTION_DOWN): 0:(1070.0,1062.0)
+:Sending Touch (ACTION_UP): 0:(1080.0,1088.6182)
+:Sending Touch (ACTION_DOWN): 0:(524.0,1207.0)
+:Sending Touch (ACTION_UP): 0:(527.1017,1207.2739)
+:Sending Touch (ACTION_DOWN): 0:(239.0,644.0)
+:Sending Touch (ACTION_UP): 0:(189.6258,627.46716)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,-4.0)
+:Sending Touch (ACTION_DOWN): 0:(852.0,389.0)
+:Sending Touch (ACTION_UP): 0:(839.0619,375.5593)
+:Sending Trackball (ACTION_MOVE): 0:(0.0,-4.0)
+    //[calendar_time:2019-04-27 12:54:50.769  system_uptime:170831566]
+    // Sending event #100
+:Sending Touch (ACTION_DOWN): 0:(430.0,729.0)
+:Sending Touch (ACTION_UP): 0:(429.7936,745.07587)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,3.0)
+:Sending Touch (ACTION_DOWN): 0:(713.0,1503.0)
+:Sending Touch (ACTION_UP): 0:(692.087,1553.9156)
+:Sending Touch (ACTION_DOWN): 0:(419.0,658.0)
+:Sending Touch (ACTION_UP): 0:(417.56802,635.8774)
+:Sending Touch (ACTION_DOWN): 0:(861.0,1074.0)
+:Sending Touch (ACTION_UP): 0:(838.3136,1102.7122)
+:Sending Touch (ACTION_DOWN): 0:(619.0,501.0)
+:Sending Touch (ACTION_UP): 0:(583.813,600.31464)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=me.kuehle.carreport/.gui.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=me.kuehle.carreport/.gui.MainActivity } in package me.kuehle.carreport
+:Sending Touch (ACTION_DOWN): 0:(564.0,1516.0)
+:Sending Touch (ACTION_UP): 0:(558.6655,1538.6034)
+:Sending Touch (ACTION_DOWN): 0:(798.0,1359.0)
+:Sending Touch (ACTION_UP): 0:(810.3565,1349.088)
+:Sending Touch (ACTION_DOWN): 0:(52.0,1199.0)
+:Sending Touch (ACTION_UP): 0:(50.189877,1195.3629)
+:Sending Trackball (ACTION_MOVE): 0:(-5.0,-5.0)
+:Sending Touch (ACTION_DOWN): 0:(408.0,1478.0)
+    //[calendar_time:2019-04-27 12:54:51.529  system_uptime:170832325]
+    // Sending event #200
+:Sending Touch (ACTION_UP): 0:(419.3432,1514.8123)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,1.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,-3.0)
+Events injected: 222
+:Sending rotation degree=0, persist=false
+:Dropped: keys=0 pointers=0 trackballs=0 flips=0 rotations=0
+## Network stats: elapsed time=1474ms (0ms mobile, 0ms wifi, 1474ms not connected)
+// Monkey finished
+:Monkey: seed=67321 count=123
+:AllowPackage: me.kuehle.carreport
+:IncludeCategory: android.intent.category.LAUNCHER
+:IncludeCategory: android.intent.category.MONKEY
+** No activities found to run, monkey aborted.
+:Monkey: seed=33302 count=123
+:AllowPackage: me.kuehle.carreport
+:IncludeCategory: android.intent.category.LAUNCHER
+:IncludeCategory: android.intent.category.MONKEY
+** No activities found to run, monkey aborted.
+:Monkey: seed=4886 count=100
+:AllowPackage: me.kuehle.carreport
+:IncludeCategory: android.intent.category.LAUNCHER
+:IncludeCategory: android.intent.category.MONKEY
+** No activities found to run, monkey aborted.
+:Monkey: seed=41497 count=100
+:AllowPackage: me.kuehle.carreport
+:IncludeCategory: android.intent.category.LAUNCHER
+:IncludeCategory: android.intent.category.MONKEY
+** No activities found to run, monkey aborted.
+  bash arg: -p
+  bash arg: me.kuehle.carreport
+  bash arg: -s
+  bash arg: 83231
+  bash arg: -v
+  bash arg: 233
+:Monkey: seed=83231 count=233
+:AllowPackage: me.kuehle.carreport
+:IncludeCategory: android.intent.category.LAUNCHER
+:IncludeCategory: android.intent.category.MONKEY
+// Event percentages:
+//   0: 15.0%
+//   1: 10.0%
+//   2: 2.0%
+//   3: 15.0%
+//   4: -0.0%
+//   5: -0.0%
+//   6: 25.0%
+//   7: 15.0%
+//   8: 2.0%
+//   9: 2.0%
+//   10: 1.0%
+//   11: 13.0%
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=me.kuehle.carreport/.gui.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=me.kuehle.carreport/.gui.MainActivity } in package me.kuehle.carreport
+:Sending Touch (ACTION_DOWN): 0:(350.0,1517.0)
+:Sending Touch (ACTION_UP): 0:(348.04028,1496.8086)
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,-5.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(259.0,102.0)
+:Sending Touch (ACTION_UP): 0:(239.52762,96.63055)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,2.0)
+:Sending Touch (ACTION_DOWN): 0:(541.0,1635.0)
+:Sending Touch (ACTION_UP): 0:(491.68634,1651.6586)
+:Sending Touch (ACTION_DOWN): 0:(321.0,1731.0)
+:Sending Touch (ACTION_UP): 0:(319.66882,1734.1936)
+:Sending Touch (ACTION_DOWN): 0:(505.0,801.0)
+:Sending Touch (ACTION_UP): 0:(496.79016,801.22345)
+:Sending Touch (ACTION_DOWN): 0:(683.0,904.0)
+:Sending Touch (ACTION_UP): 0:(699.43427,908.0211)
+:Sending Touch (ACTION_DOWN): 0:(881.0,758.0)
+:Sending Touch (ACTION_UP): 0:(874.66345,759.2391)
+:Sending Touch (ACTION_DOWN): 0:(729.0,1585.0)
+:Sending Touch (ACTION_UP): 0:(731.10913,1573.0625)
+:Sending Touch (ACTION_DOWN): 0:(282.0,1291.0)
+:Sending Touch (ACTION_UP): 0:(356.2264,1377.3137)
+:Sending Touch (ACTION_DOWN): 0:(325.0,2020.0)
+    //[calendar_time:2019-04-27 17:58:54.561  system_uptime:189075358]
+    // Sending event #100
+:Sending Touch (ACTION_UP): 0:(286.82004,1977.6309)
+:Sending Touch (ACTION_DOWN): 0:(790.0,311.0)
+:Sending Touch (ACTION_UP): 0:(789.1959,308.27808)
+:Sending Trackball (ACTION_MOVE): 0:(0.0,4.0)
+:Sending Touch (ACTION_DOWN): 0:(56.0,1237.0)
+:Sending Touch (ACTION_UP): 0:(60.30711,1237.7931)
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,0.0)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=me.kuehle.carreport/.gui.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=me.kuehle.carreport/.gui.MainActivity } in package me.kuehle.carreport
+:Sending Trackball (ACTION_MOVE): 0:(0.0,2.0)
+:Sending Touch (ACTION_DOWN): 0:(613.0,675.0)
+:Sending Touch (ACTION_UP): 0:(592.2988,676.08984)
+:Sending Touch (ACTION_DOWN): 0:(858.0,738.0)
+:Sending Touch (ACTION_UP): 0:(856.9831,744.0881)
+:Sending Touch (ACTION_DOWN): 0:(376.0,1757.0)
+:Sending Touch (ACTION_UP): 0:(375.8695,1757.8062)
+:Sending Touch (ACTION_DOWN): 0:(825.0,1901.0)
+:Sending Touch (ACTION_UP): 0:(838.8154,1911.9756)
+:Sending Touch (ACTION_DOWN): 0:(422.0,1082.0)
+:Sending Touch (ACTION_UP): 0:(425.35977,1205.2341)
+:Sending Touch (ACTION_DOWN): 0:(560.0,1923.0)
+:Sending Touch (ACTION_UP): 0:(596.7199,1959.5745)
+:Sending Trackball (ACTION_MOVE): 0:(0.0,1.0)
+    //[calendar_time:2019-04-27 17:58:55.311  system_uptime:189076108]
+    // Sending event #200
+:Sending Touch (ACTION_DOWN): 0:(162.0,1173.0)
+:Sending Touch (ACTION_UP): 0:(160.5488,1167.1964)
+:Sending Touch (ACTION_DOWN): 0:(804.0,1878.0)
+:Sending Touch (ACTION_UP): 0:(876.1312,1740.1919)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=me.kuehle.carreport/.gui.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=me.kuehle.carreport/.gui.MainActivity } in package me.kuehle.carreport
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=me.kuehle.carreport/.gui.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=me.kuehle.carreport/.gui.MainActivity } in package me.kuehle.carreport
+:Sending Touch (ACTION_DOWN): 0:(751.0,1386.0)
+:Sending Touch (ACTION_UP): 0:(731.2278,1378.7397)
+:Sending Touch (ACTION_DOWN): 0:(46.0,1726.0)
+Events injected: 233
+:Sending rotation degree=0, persist=false
+:Dropped: keys=0 pointers=0 trackballs=0 flips=0 rotations=0
+## Network stats: elapsed time=1807ms (0ms mobile, 0ms wifi, 1807ms not connected)
+// Monkey finished

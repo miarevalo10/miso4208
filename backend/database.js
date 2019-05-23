@@ -66,38 +66,88 @@ class Database {
     return ref.key;
   }
 
-  saveVersion(projectId,version) {
+  saveVersion(projectId, version) {
     const {
-      apkFile,createdDate,name
+      apkFile, createdDate, name
     } = version
     console.log(`ref version ${projectId}`);
-    return db.ref(`projects/${projectId}/versions`).push({
-      apkFile,createdDate,name
-    });
+    if (apkFile) {
+      return db.ref(`projects/${projectId}/versions`).push({
+        apkFile, createdDate, name
+      });
+    } else {
+      return db.ref(`projects/${projectId}/versions`).push({
+        createdDate, name
+      });
+    }
   }
 
   saveProcess(process) {
+    console.log('lo que LLEGA', process)
     const refPush = `projects/${process.projectId}/versions/${process.versionKey}/process`;
     console.log(`ruta para push ${refPush}`);
-    const dbProcess = {
-      events: process.events,
-      seed: process.seed,
+    let dbProcess = {
+      ...process,
       state: 'Sent',
       type: process.queue
+    }
+    if (process.queue === 'Monkey') {
+      dbProcess = {
+        events: process.events,
+        seed: process.seed,
+        state: 'Sent',
+        type: process.queue
+      }
+    } else if (process.queue === 'Calabash') {
+      dbProcess = {
+        file: process.file,
+        state: 'Sent',
+        type: process.queue
+      }
+    } else if (process.queue === 'Cypress') {
+      dbProcess = {
+        file: process.file,
+        state: 'Sent',
+        type: 'BDT'
+      }
+    }
+    else if (process.queue === 'vrt') {
+      console.log('vrttt');
+      dbProcess = {
+        "versionOneId": process.versionOneId,
+        "versionTwoId": process.versionTwoId,
+        "processOneId": process.processOneId,
+        "processTwoId": process.processTwoId,
+        state: 'Sent'
+      }
+      return db.ref(`projects/${process.projectId}/vrt`).push(dbProcess).key;
+
     }
     return db.ref(refPush).push(dbProcess).key;
   }
 
-  updateProcess(projectId,versionId,processId, pstate) {
-    console.log('update process')
+  updateProcess(projectId, versionId, processId, pstate) {
     let processStr = `projects/${projectId}/versions/${versionId}/process/${processId}`;
     console.log('update process', processStr);
 
-    db.ref().child(processStr).update({'state': pstate, 'lastUpdate': new Date()}).then().catch();
+    db.ref().child(processStr).update({ 'state': pstate, 'lastUpdate': new Date() }).then().catch();
   }
 
   getProcess(projectId, versionId, processId) {
-    return db.ref('projects/' + projectId +"/versions/"+versionId+ "/process/" + processId)
+    return db.ref('projects/' + projectId + "/versions/" + versionId + "/process/" + processId)
+  }
+
+  getVrtProcess(projectId, processId) {
+    console.log('VRT PROCESS', 'projects/' + projectId + "/vrt/"+ processId)
+
+    return db.ref('projects/' + projectId + "/vrt/"+ processId)
+  }
+
+  updateVrtProcess(projectId,  processId, pstate) {
+    let processStr = `projects/${projectId}/vrt/${processId}`;
+    console.log('update process', processStr);
+
+    db.ref().child(processStr).update({ 'state': pstate, 'lastUpdate': new Date() }).then().catch();
   }
 
   getApplications(callback) {

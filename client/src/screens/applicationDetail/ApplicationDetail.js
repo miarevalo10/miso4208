@@ -2,12 +2,15 @@ import React, { Component } from 'react';
 import {
     ListGroup, ListGroupItem, Container,
     Badge, ListGroupItemHeading, ListGroupItemText,
-    Collapse, Button, CardBody,
-    Card, Row
+    Collapse, Button, Card,
+    Row,
 } from 'reactstrap';
 import _ from 'lodash';
-import ScriptUpload from '../ScriptUpload'
-import NewTestRun from '../NewTestRun'
+import NewTestRun from '../NewTestRun';
+import { Link } from "react-router-dom";
+import axios from "axios";
+import Vrtscreen from '../vrtscreen';
+import AddNewVersion from '../../AddNewVersion';
 
 
 export default class ApplicationDetail extends Component {
@@ -17,17 +20,20 @@ export default class ApplicationDetail extends Component {
             application: this.props.location.state.application,
             appKey: this.props.location.state.key,
             collapse: false,
-            collapseTwo: false
+            collapseTwo: false,
+            collapseThree: false,
         }
-        console.log('app key in app detail', this.state.appKey);
     }
-
 
     toggle = () => {
         if (this.state.collapse) {
             this.setState(state => ({ collapse: !state.collapse }));
         } else {
-            this.setState(state => ({ collapse: !state.collapse, collapseTwo: false }));
+            this.setState(state => ({
+                collapse: !state.collapse,
+                collapseTwo: false,
+                collapseThree: false
+            }));
         }
 
     }
@@ -36,19 +42,40 @@ export default class ApplicationDetail extends Component {
         if (this.state.collapseTwo) {
             this.setState(state => ({ collapseTwo: !state.collapseTwo }));
         } else {
-            this.setState(state => ({ collapseTwo: !state.collapseTwo, collapse: false }));
+            this.setState(state => ({
+                collapseTwo: !state.collapseTwo,
+                collapse: false,
+                collapseThree: false
+            }));
         }
     }
 
-    componentDidMount() {
-        console.log("componbent mounted");
+    toggleThree = () => {
+        if (this.state.collapseThree) {
+            this.setState(state => ({ collapseThree: !state.collapseThree }));
+        } else {
+            this.setState(state => ({
+                collapseThree: !state.collapseThree,
+                collapse: false,
+                collapseTwo: false
+            }));
+        }
     }
 
-    renderMonkey = (process, key) => {
-        var report
-        if (process.report) {
-            report = <a href={process.report}>See report - </a>
-        }
+    renderMonkey = (process, key, version) => {
+        var report = <Link to={{
+            pathname: '/process-details',
+            state: {
+                appKey: this.state.appKey,
+                process: process,
+                processKey: key,
+                appName: this.state.application.name,
+
+            }
+        }}>
+            See report
+            </Link>
+
         var events
         if (process.events) {
             events = <span>       # of events: {process.events} - </span>
@@ -57,53 +84,160 @@ export default class ApplicationDetail extends Component {
         if (process.seed) {
             seed = <span>Seed: {process.seed} - </span>
         }
-        var state
-        if (process.state) {
-            state = <span>State: {process.state} </span>
+        var stateHTML
+        var color
+        const { state } = process;
+        if (state) {
+            stateHTML = <span>State: {process.state} </span>
+            if (state === "Terminated" || state === "Finished") {
+                color = "success"
+            } else if (state === "Running" || state === "In progress") {
+                color = "info"
+            } else if (state === "Sent") {
+                color = "warning"
+            } else if (state === "Failed") {
+                color = "danger"
+            }
         }
-        return <ListGroupItem key={key}>
-            <ListGroupItemHeading>Monkey testing</ListGroupItemHeading>
+        var title = "Monkey testing"
+        if (version) {
+            title += " on version " + version.name
+        }
+        return <ListGroupItem key={key} color={color}>
+            <ListGroupItemHeading>{title}</ListGroupItemHeading>
             <ListGroupItemText>
                 {report}
                 {events}
                 {seed}
-                {state}</ListGroupItemText>
+                {stateHTML}</ListGroupItemText>
 
         </ListGroupItem>
     }
 
     renderBDT = (process, key) => {
-        var report
-        if (process.report) {
-            report = <a href={process.report}>See report</a>
+        const { state } = process;
+
+        var stateHTML
+        var color
+        if (state) {
+            stateHTML = <span>State: {process.state} </span>
+            if (state === "Terminated" || state === "Finished") {
+                color = "success";
+                var report = <Link to={{
+                    pathname: '/process-details',
+                    state: {
+                        appKey: this.state.appKey,
+                        process: process,
+                        processKey: key
+                    }
+                }}>
+                    See report
+                </Link>
+
+            } else if (state === "Running" || state === "In progress") {
+                color = "info"
+            } else if (state === "Sent") {
+                color = "warning"
+            } else if (state === "Failed") {
+                color = "danger"
+            }
         }
-        var state
-        if (process.state) {
-            state = <span> - State: {process.state}</span>
-        }
-        return <ListGroupItem key={key}>
+        return <ListGroupItem key={key} color={color}>
             <ListGroupItemHeading>BDT testing</ListGroupItemHeading>
             <ListGroupItemText>
                 {report}
-                {state}
+                -
+                {stateHTML}
             </ListGroupItemText>
         </ListGroupItem>
 
     }
 
-    renderProcesses = () => {
-        const { process } = this.state.application
-        return _.map(process, (value, key) => {
-            if (value.type.toLowerCase() === 'random') {
-                return this.renderMonkey(value, key)
-            } else if (value.type.toLowerCase() === 'bdt') {
-                return this.renderBDT(value, key)
-            } else {
-                return <ListGroupItem key={key}>
-                </ListGroupItem>
-            }
+    renderVRT = () => {
+        const { vrt } = this.state.application;
 
-        })
+        return _.map(vrt, (value, key) => {
+            const { state, versionOneId, versionTwoId} = value;
+            const process = value;
+            var stateHTML;
+            var color;
+            console.log(' Process ', process);
+            if (state) {
+                stateHTML = <span>State: {process.state} </span>
+                if (state === "Terminated" || state === "Finished") {
+                    color = "success";
+                    var report = <Link to={{
+                        pathname: '/vrt-report',
+                        state: {
+                            process: process
+                        }
+                    }}>
+                        See report
+                </Link>
+
+                } else if (state === "Running" || state === "In progress") {
+                    color = "info"
+                } else if (state === "Sent") {
+                    color = "warning"
+                } else if (state === "Failed") {
+                    color = "danger"
+                }
+            }
+            return <ListGroupItem key={key} color={color}>
+                <ListGroupItemHeading>VRT Testing</ListGroupItemHeading>
+                <ListGroupItemText>
+                    {report}
+                    -
+                {stateHTML}
+                {/* Version1: {versionOneId}
+                Version2: {versionTwoId} */}
+                </ListGroupItemText>
+            </ListGroupItem>
+        }
+
+        )
+    }
+
+
+    renderProcesses = () => {
+        console.log('application', this.state.application);
+
+        const { versions } = this.state.application;
+        if (versions) {
+            return _.map(versions, (version, key) => {
+                const { process } = version;
+                return _.map(process, (value, key) => {
+                    if (value.type && (value.type.toLowerCase() === 'random' || value.type.toLowerCase() === 'monkey')) {
+                        return this.renderMonkey(value, key, version)
+                    } else if (value.type && (value.type.toLowerCase() === 'bdt' || value.type.toLowerCase() === 'calabash')) {
+                        return this.renderBDT(value, key)
+                    } else {
+                        var stateHTML
+                        var color
+                        const { state } = value;
+                        if (state) {
+                            stateHTML = <span>State: {value.state} </span>
+                            if (state === "Terminated" || state === "Finished") {
+                                color = "success"
+                            } else if (state === "Running" || state === "In progress") {
+                                color = "info"
+                            } else if (state === "Sent") {
+                                color = "warning"
+                            } else if (state === "Failed") {
+                                color = "danger"
+                            }
+                        }
+                        return <ListGroupItem key={key} color={color}>
+                            {stateHTML} - Version: {version.name}
+                        </ListGroupItem>
+                    }
+
+                })
+            })
+        }
+
+
+
     }
 
     renderBrowsers = () => {
@@ -128,6 +262,90 @@ export default class ApplicationDetail extends Component {
             <Badge color="secondary">max version: {maxSdk}</Badge>
         </div>
         )
+    }
+
+    handleChange = async (event) => {
+        const { target } = event;
+        const value = target.type === 'checkbox' ? target.checked : target.value;
+        const { name } = target;
+        console.log("name: " + name + ", value: " + value);
+        await this.setState({
+            [name]: value,
+        });
+    }
+
+    handleApkUpload = (event) => {
+        this.setState({ file: event.target.files });
+        this.setState({ apkFile: event.target.files[0].name })
+        console.log('handle file upload', this.state.file, 'event', event.target.files[0]);
+    }
+
+    submitApk = () => {
+        const formData = new FormData();
+
+        formData.append('file', this.state.file[0]);
+        formData.append('timestamp', new Date())
+        axios.post("http://localhost:3001/api/apk-upload", formData, {
+            headers: {
+                'Content-Type': 'application/apk'
+            }
+        }).then(response => {
+            console.log('res fileupload', response)
+
+            this.setState({
+                success: true,
+                message: "File upload succesfully"
+            });
+        }).catch(error => {
+            console.log(error)
+            this.setState({
+                success: true,
+                message: error.message
+            });
+        });
+
+        const versionToAdd = {
+            projectId: this.state.appKey,
+            version: {
+                apkFile: this.state.apkFile,
+                createdDate: new Date(),
+                name: this.state.versionName
+            }
+        }
+        axios.post("http://localhost:3001/applications/addVersion", versionToAdd)
+            .then(response => {
+                console.log('Version added', response)
+                alert('Version added');
+
+            }).catch(error => {
+                console.log(error)
+                alert('There was a problem adding the version');
+            });
+    }
+
+    renderVersionsOfApp = () => {
+        const { versions } = this.state.application
+        if (versions) {
+            return _.map(versions, (value, key) => {
+                var date = value.createdDate ? " - Uploaded on: " + this.formatDate(new Date(value.createdDate)) : ""
+                return <ListGroupItem key={key}>{value.name} {date}</ListGroupItem>
+            })
+        }
+    }
+
+    formatDate = (date) => {
+        var monthNames = [
+            "January", "February", "March",
+            "April", "May", "June", "July",
+            "August", "September", "October",
+            "November", "December"
+        ];
+
+        var day = date.getDate();
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+
+        return day + ' ' + monthNames[monthIndex] + ' ' + year;
     }
 
     render() {
@@ -155,28 +373,59 @@ export default class ApplicationDetail extends Component {
                 <br />
                 <ListGroup>
                     {this.renderProcesses()}
+                    {this.renderVRT()}
                 </ListGroup>
+                <br />
+                <br />
+                <h2>Versions</h2>
+                <br />
+                <ListGroup>
+                    {this.renderVersionsOfApp()}
+                </ListGroup>
+                <br />
+                <br />
                 <Row>
                     <Container>
-                        <Button color="primary" onClick={this.toggle} style={{ marginBottom: '1rem' }}>New test</Button>
-                    
-                        <Button color="primary" onClick={this.toggleTwo} style={{ marginBottom: '1rem' }}>Upload script</Button>
+                        <Button outline size="lg" color="primary" onClick={this.toggle} style={{ marginBottom: '1rem' }}>New test</Button>
+
+                        <Button outline size="lg" color="primary" onClick={this.toggleTwo} style={{ marginBottom: '1rem' }}>Add new version</Button>
+
+                        <Button outline size="lg" color="primary" onClick={this.toggleThree} style={{ marginBottom: '1rem' }}>Run vrt</Button>
                     </Container>
 
                 </Row>
 
                 <Collapse isOpen={this.state.collapse}>
                     <Card>
-                        <NewTestRun application={app} appKey={this.state.appKey}/>
+                        <NewTestRun application={app} appKey={this.state.appKey} />
                     </Card>
                 </Collapse>
 
                 <Collapse isOpen={this.state.collapseTwo}>
                     <Card>
-                        <ScriptUpload application={app} />
+                        <AddNewVersion application={app} appKey={this.state.appKey} />
+                        {/*
+                            Version Name
+                            <Input
+                                name="versionName"
+                                id="exampleZip"
+                                onChange={(e) => {
+                                    this.handleChange(e)
+                                }} />
+                        <Label for="exampleZip">Upload apk </Label>
+                            <input label='upload file' type='file' onChange={this.handleApkUpload} />
+                        <button className="btn btn-primary" onClick={this.submitApk} >Upload</button>
+                            */}
                     </Card>
                 </Collapse>
 
+                <Collapse isOpen={this.state.collapseThree}>
+                    <Card>
+                        <Vrtscreen application={app} projectId={this.state.appKey} />
+                    </Card>
+                </Collapse>
+                <br />
+                <br />
             </Container>
         )
     }
