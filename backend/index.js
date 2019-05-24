@@ -42,7 +42,7 @@ app.use(allowCrossDomain);
 app.use('/applications', applications);
 
 router.post("/sendTest", (req, res) => {
-    //console.log('sendtest', req.body);
+    console.log('sendtest', req.body);
     var msg = {};
     var queue = "";
     const processId = db.saveProcess(req.body);
@@ -97,7 +97,8 @@ router.post("/sendTest", (req, res) => {
                 "processOneId": req.body.processOneId,
                 "processTwoId": req.body.processTwoId,
                 "projectId" : req.body.projectId,
-                "vrtProcessId": processId
+                "vrtProcessId": processId,
+                "type" : req.body.type
             }
             queue = process.env.SQS_VRT;
             break;

@@ -13,6 +13,7 @@ AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
+
 var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 var s3 = new AWS.S3();
 
@@ -22,7 +23,7 @@ var params = {
 
 const basePath = './calabash/';
 const featuresFile = 'features.zip';
-const BUCKET_NAME = 'pruebas-autom'
+const BUCKET_NAME = 'pruebas-autom';
 const URL_S3 = 'https://s3-us-west-2.amazonaws.com/' + BUCKET_NAME + "/";
 const FOLDER_S3 = 'calabash/';
 const HOOKS_FILE_NAME = 'app_life_cycle_hooks.rb';
@@ -163,7 +164,7 @@ const resignApk = (apkName) => {
 
 const runTestingSet = (test) => {
   console.log('running test suite', shell.exec(`calabash-android run ${test.apkName} --format html --out report.html`).stdout);
-  uploadFileToS3('report.html', s3Path(test), 'text/html');
+  uploadFileToS3('report.html', s3Path(test), "text/html");
   uploadImages(test);
 
 }
@@ -171,13 +172,13 @@ const runTestingSet = (test) => {
 function uploadImages(test) {
   fs.readdirSync('./').forEach(file => {
     if (file.match(/[\/.](gif|jpg|jpeg|tiff|png)$/i)) {
-      uploadFileToS3(file, s3Path(test), 'image/png');
+      uploadFileToS3(file, s3Path(test), "image/png");
     }
   });
   uploadDir('screenshots', test);
 }
 
-function finishTest() {
+function finishTest(test) {
   updateProcess(test);
   deleteMessage();
   deleteFiles();
@@ -233,14 +234,15 @@ function uploadDir(dir, data) {
         walkSync(filePath, callback);
       }
     });
-    finishTest();
+    finishTest(data);
   }
   function s3Path(data) {
-    return FOLDER_S3 + data.projectId + "/version/" + data.versionId + "/process/" + data.processId + "/screenshots/"
+    return FOLDER_S3 + data.projectId + "/versions/" + data.versionId + "/process/" + data.processId + "/screenshots/"
   }
   walkSync(dir, function (filePath) {
     let bucketPath = s3Path(data) + filePath.substring(dir.length + 1);
-    let params = { Bucket: BUCKET_NAME, Key: bucketPath, Body: fs.readFileSync(filePath) };
+    let params = { Bucket: BUCKET_NAME, Key: bucketPath, Body: fs.readFileSync(filePath), ContentType: 'image/png',
+      ACL: 'public-read' };
     s3.putObject(params, function (err, data) {
       if (err) {
         console.log(err)
@@ -252,7 +254,7 @@ function uploadDir(dir, data) {
 };
 
 function s3Path(data) {
-  return FOLDER_S3 + data.projectId + "/version/" + data.versionId + "/process/" + data.processId + "/"
+  return FOLDER_S3 + data.projectId + "/versions/" + data.versionId + "/process/" + data.processId + "/"
 }
 
 // downloadApk({

@@ -19,6 +19,7 @@ export default class Vrtscreen extends Component {
             versionTwo: "",
             processOne: "",
             processTwo: "",
+            type:"",
             collapseTwo: false,
             collapseThree: false,
             collapseFour: false,
@@ -96,7 +97,6 @@ export default class Vrtscreen extends Component {
         const { process } = this.state.versionOne
         console.log("process one:", process)
         var toSave;
-        var toSaveKey;
         _.forEach(process, (value, key) => {
             console.log('value', value, 'key', key)
             if (key === target.value) {
@@ -156,6 +156,13 @@ export default class Vrtscreen extends Component {
 
 
     submitForm = (e) => {
+        let type = '';
+        if(this.state.application.type ==='Android') {
+            type = 'calabash';
+        } else if (this.state.application === 'web'){
+            type= 'cypress'
+        }
+
         e.preventDefault();
         console.log("submit", this.state);
         const test = {
@@ -164,6 +171,7 @@ export default class Vrtscreen extends Component {
             versionTwoId: this.state.versionTwo.key,
             processOneId: this.state.processOne.key,
             processTwoId: this.state.processTwo.key,
+            type: type,
             queue: 'vrt'
         }
         console.log('TESTT', test);
