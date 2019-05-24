@@ -114,7 +114,7 @@ router.post("/sendTest", (req, res) => {
             console.log('sqs error msg ', err);
             res.json({ success: false, error: err }); ("Error", err);
         } else {
-            console.log('success');
+            console.log('success', data);
             return res.json({ success: true });
         }
     });

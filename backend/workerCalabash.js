@@ -5,8 +5,14 @@ var AdmZip = require('adm-zip');
 var rimraf = require("rimraf");
 const path = require('path');
 let db = require('./database');
+const dotenv = require('dotenv');
+dotenv.config();
 
-AWS.config.update({ region: 'us-west-2' });
+AWS.config.update({
+  region: 'us-west-2',
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+});
 var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 var s3 = new AWS.S3();
 
@@ -19,14 +25,24 @@ const featuresFile = 'features.zip';
 const BUCKET_NAME = 'pruebas-autom'
 const URL_S3 = 'https://s3-us-west-2.amazonaws.com/' + BUCKET_NAME + "/";
 const FOLDER_S3 = 'calabash/';
-
+const HOOKS_FILE_NAME = 'app_life_cycle_hooks.rb';
+const HOOKS_FOLDER = 'features/support/'
 /**
 * Msg example expected from queue
-* {projectId: '-Ldtest', processId:'-Ldtestp', 
-*  testingSet: 'car_report_features2.zip', project: 'calabash-android', apkName: 'me.kuehle.carreport_79.apk' }
+* {
+//   projectId: '-LdQQIC-151ME1muI3rK', processId: '-LdUB5v1Afw7ebtryrX0', versionId: '-LdQQIC5TH6lLAcfSvEk',
+//   testingSet: 'car_report_features2.zip', project: 'calabash-android', apkName: 'me.kuehle.carreport_79.apk'
+// }
 */
 
 var t = setInterval(rcvMsg, 2000);
+changeFolder();
+downloadHooksCalabash();
+
+const test = {
+  projectId: '-LdQQIC-151ME1muI3rK', processId: '-LdUB5v1Afw7ebtryrX0', versionId: '-LdQQIC5TH6lLAcfSvEk',
+  testingSet: 'car_report_features2.zip', project: 'calabash-android', apkName: 'me.kuehle.carreport_79.apk'
+};
 
 function rcvMsg() {
   sqs.receiveMessage(params, function (err, data) {
@@ -37,10 +53,11 @@ function rcvMsg() {
         console.log('msg rcv', JSON.parse(test));
         receiptHandle = data.Messages[0].ReceiptHandle;
         var testObj = JSON.parse(test);
-        db.updateProcess(testObj.projectId,testObj.versionId ,testObj.processId, 'In progress');
+        db.updateProcess(testObj.projectId, testObj.versionId, testObj.processId, 'In progress');
         downloadApk(testObj);
       } else {
-        console.log('no new msgs');
+        delete
+          console.log('no new msgs');
       }
     }
   });
@@ -51,20 +68,28 @@ const downloadApk = (test) => {
     Bucket: 'pruebas-autom',
     Key: 'apks/' + test.apkName
   };
-  console.log('keyyyy', params.Key);
+
+  const filePath = test.apkName;
+  if (!fs.existsSync(filePath)) {
+    s3.getObject(params, (err, data) => {
+      if (err) console.error(err)
+      else {
+        console.log('Starting ' + test.apkName + ' download');
+        fs.writeFileSync(filePath, data.Body)
+        console.log(`${filePath} has been created!`);
+        downloadFeatures(test);
+      }
+    });
+  } else {
+    downloadFeatures(test);
+  }
+}
+
+function changeFolder() {
   if (!fs.existsSync(basePath)) {
     fs.mkdirSync(basePath);
   }
-  const filePath = basePath + test.apkName;
-  s3.getObject(params, (err, data) => {
-    if (err) console.error(err)
-    else {
-      console.log('Starting ' + test.apkName + ' download');
-      fs.writeFileSync(filePath, data.Body)
-      console.log(`${filePath} has been created!`);
-      downloadFeatures(test);
-    }
-  })
+  shell.cd(basePath)
 }
 
 const downloadFeatures = (test) => {
@@ -73,29 +98,62 @@ const downloadFeatures = (test) => {
     Key: 'scripts/' + test.testingSet
   };
   console.log('key', params.Key);
-  if (!fs.existsSync(basePath)) {
-    fs.mkdirSync(basePath);
-  }
-  const filePath = basePath + featuresFile;
+
+  const filePath = featuresFile;
+  const hooksOld = HOOKS_FOLDER + HOOKS_FILE_NAME;
   s3.getObject(params, (err, data) => {
     if (err) console.error(err)
     else {
-      console.log('Starting features download', data);
+      console.log('Starting features download');
       fs.writeFileSync(filePath, data.Body);
       unzipFile(featuresFile);
-      shell.cd(basePath)
+      fs.copyFileSync(HOOKS_FILE_NAME, hooksOld);
       resignApk(test.apkName);
       runTestingSet(test);
-      rimraf.sync(basePath);
     }
   })
 }
 
+function deleteFiles() {
+
+  fs.readdir('./', (err, files) => {
+    if (err) throw err;
+
+    for (const file of files) {
+      if (!fs.existsSync(file)) {
+        if (fs.lstatSync(file).isDirectory()) {
+          rimraf.sync(file);
+        } else if (file !== HOOKS_FILE_NAME) {
+          fs.unlinkSync(path.join('./', file));
+        }
+      }
+    }
+  });
+}
+
+function downloadHooksCalabash() {
+  if (!fs.existsSync(HOOKS_FILE_NAME)) {
+    var params = {
+      Bucket: 'pruebas-autom',
+      Key: 'scripts/' + HOOKS_FILE_NAME
+    };
+    console.log('key', params.Key);
+    const filePath = HOOKS_FILE_NAME;
+    s3.getObject(params, (err, data) => {
+      if (err) console.error(err)
+      else {
+        console.log('Starting hooks download');
+        fs.writeFileSync(filePath, data.Body);
+      }
+    })
+  }
+}
+
 function unzipFile(location) {
-  const filePath = basePath + location;
+  const filePath = location;
   console.log(filePath, 'filepath')
   var zip = new AdmZip(filePath);
-  zip.extractAllTo(basePath, true);
+  zip.extractAllTo('./', true);
 }
 
 const resignApk = (apkName) => {
@@ -107,8 +165,7 @@ const runTestingSet = (test) => {
   console.log('running test suite', shell.exec(`calabash-android run ${test.apkName} --format html --out report.html`).stdout);
   uploadFileToS3('report.html', s3Path(test), 'text/html');
   uploadImages(test);
-  updateProcess(test);
-  deleteMessage();
+
 }
 
 function uploadImages(test) {
@@ -117,17 +174,19 @@ function uploadImages(test) {
       uploadFileToS3(file, s3Path(test), 'image/png');
     }
   });
+  uploadDir('screenshots', test);
 }
 
+function finishTest() {
+  updateProcess(test);
+  deleteMessage();
+  deleteFiles();
+}
 function updateProcess(data) {
-  let process = db.getProcess(data.projectId,data.versionId ,data.processId);
+  let process = db.getProcess(data.projectId, data.versionId, data.processId);
   process.child('report').set(URL_S3 + s3Path(data) + 'report.html');
-  db.updateProcess(data.projectId,data.versionId ,data.processId, 'Terminated');
+  db.updateProcess(data.projectId, data.versionId, data.processId, 'Terminated');
   console.log(`Process ${data.processId} terminated`);
-}
-
-function s3Path(data) {
-  return FOLDER_S3 + data.projectId + "/version/"+data.versionId +"/process/" + data.processId + "/"
 }
 
 function uploadFileToS3(filePath, s3Path, contentType) {
@@ -147,13 +206,13 @@ function uploadFileToS3(filePath, s3Path, contentType) {
 }
 
 
-function deleteMessage()  {
+function deleteMessage() {
   var deleteParams = {
     QueueUrl: params.QueueUrl,
     ReceiptHandle: receiptHandle
   };
 
-  sqs.deleteMessage(deleteParams, function(err, data) {
+  sqs.deleteMessage(deleteParams, function (err, data) {
     if (err) {
       console.log("Delete Error", err);
     } else {
@@ -162,5 +221,41 @@ function deleteMessage()  {
   });
 }
 
-// downloadApk( {projectId: '-Ldtest', processId:'-Ldtestp', 
-// testingSet: 'car_report_features2.zip', project: 'calabash-android', apkName: 'me.kuehle.carreport_79.apk' })
+function uploadDir(dir, data) {
+
+  function walkSync(currentDirPath, callback) {
+    fs.readdirSync(currentDirPath).forEach(function (name) {
+      var filePath = path.join(currentDirPath, name);
+      var stat = fs.statSync(filePath);
+      if (stat.isFile()) {
+        callback(filePath, stat);
+      } else if (stat.isDirectory()) {
+        walkSync(filePath, callback);
+      }
+    });
+    finishTest();
+  }
+  function s3Path(data) {
+    return FOLDER_S3 + data.projectId + "/version/" + data.versionId + "/process/" + data.processId + "/screenshots/"
+  }
+  walkSync(dir, function (filePath) {
+    let bucketPath = s3Path(data) + filePath.substring(dir.length + 1);
+    let params = { Bucket: BUCKET_NAME, Key: bucketPath, Body: fs.readFileSync(filePath) };
+    s3.putObject(params, function (err, data) {
+      if (err) {
+        console.log(err)
+      } else {
+        //console.log('Successfully uploaded ' + bucketPath + ' to ' + BUCKET_NAME);
+      }
+    });
+  });
+};
+
+function s3Path(data) {
+  return FOLDER_S3 + data.projectId + "/version/" + data.versionId + "/process/" + data.processId + "/"
+}
+
+// downloadApk({
+//   projectId: '-LdQQIC-151ME1muI3rK', processId: '-LdUB5v1Afw7ebtryrX0', versionId: '-LdQQIC5TH6lLAcfSvEk',
+//   testingSet: 'car_report_features2.zip', project: 'calabash-android', apkName: 'me.kuehle.carreport_79.apk'
+// })
