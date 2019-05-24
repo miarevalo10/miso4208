@@ -8,7 +8,7 @@ Scenario: Search a survey with results
     When I press input name "yt0"
     Then Search table shows "Encuesta Pruebas E2E"
 
-Scenario: Search a survey without results
+Scenario: Search a survey without results {4}
     Given I go to administration panel
     When I press button "panel-2"
     When I fill "Survey_searched_value" with "random:titulo"

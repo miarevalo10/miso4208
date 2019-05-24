@@ -1,14 +1,20 @@
+var faker = require('faker/locale/es_MX')
+
 //var appUrl = 'http://ec2-3-87-196-16.compute-1.amazonaws.com/index.php/admin/index';
 var appUrl = 'http://ec2-3-87-196-16.compute-1.amazonaws.com/index.php/admin/authentication/sa/login';
-var data_mock;
-const RANDOM_COUNT = 1000
 const SEP_RANDOM = ":"
 const RANDOM = "random" + SEP_RANDOM
+const mapFaker = {
+  'usuario': 'internet.userName',
+  'password': 'internet.password',
+  'email': 'internet.email',
+  'titulo': 'lorem.words',
+  'descripcion': 'lorem.sentence',
+}
+var seed = 1234;
 
 beforeEach(() => {
-  cy.fixture("mock_data").then((data) => {
-    data_mock = data
-  });
+  faker.seed(seed++);
 
   Given(`I go to administration login`, () => {
     cy.visit(appUrl)
@@ -51,8 +57,7 @@ Then(`Search table shows {string}`, (register) => {
 function getValue(value) {
   if (value.startsWith(RANDOM)) {
     let res = value.split(SEP_RANDOM);
-    let indice = Math.floor(Math.random() * 1000);    
-    return data_mock[indice][res[1]];
+    return index(faker, mapFaker[res[1]])();
   } else {
     return value;
   }
@@ -74,4 +79,16 @@ function buscarEncuesta(encuesta) {
   cy.get('.selector__list_surveys').click()
   cy.get('input[id="Survey_searched_value"]').click().type(encuesta)
   cy.get('#surveys').find('input[name="yt0"]').click()
+}
+
+// Tomado de https://stackoverflow.com/questions/6393943/convert-javascript-string-in-dot-notation-into-an-object-reference
+function index(obj,is, value) {
+  if (typeof is == 'string')
+      return index(obj,is.split('.'), value);
+  else if (is.length==1 && value!==undefined)
+      return obj[is[0]] = value;
+  else if (is.length==0)
+      return obj;
+  else
+      return index(obj[is[0]],is.slice(1), value);
 }

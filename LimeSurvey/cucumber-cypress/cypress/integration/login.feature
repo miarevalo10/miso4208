@@ -10,7 +10,7 @@ Scenario: Login is correct
     When I press button name "login_submit"
     Then I see the message "Esta es la interface de administración de LimeSurvey"
 
-Scenario: Login failed
+Scenario: Login failed {3}
     Given I go to administration login
     When I fill "user" with "random:usuario"
     When I fill "password" with "random:password"
