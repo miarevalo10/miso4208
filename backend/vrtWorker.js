@@ -1,5 +1,7 @@
 var AWS = require('aws-sdk');
 const compareImages = require("resemblejs/compareImages");
+const resemble = require("resemblejs");
+
 const fs = require("mz/fs")
 var shell = require('shelljs');
 var AdmZip = require('adm-zip');
@@ -34,14 +36,16 @@ const URL_S3 = 'https://s3-us-west-2.amazonaws.com/' + BUCKET_NAME + "/"
  * "processOneId":"-LdV5bXOZ8wCPYK-w7br","processTwoId":"-LdV5bXOZ8wCPYK-w7br",
  * "projectId":"-LbQxpuXbI9dVHD83BjD","vrtProcessId":"-LfRLt61UV8bH0ZWr3kW"}
  */
+// {"versionOneId":"-LdUxhUHPhzUHzD-0OaQ","versionTwoId":"-LdUxhUHPhzUHzD-0OaQ","processOneId":"-LfRjVR7VmB_NZpTlxxl","processTwoId":"-LfRjVR7VmB_NZpTlxxl","projectId":"-LbQxpuXbI9dVHD83BjD","vrtProcessId":"-Lfje33Sx6yjCf3BtW11","type":"cypress"}
 
 const examplejson = {
     versionOneId: "-LdUxhUHPhzUHzD-0OaQ",
     versionTwoId: "-LdUxhUHPhzUHzD-0OaQ",
     processOneId: "-LfRjVR7VmB_NZpTlxxl",
     processTwoId: "-LfRjVR7VmB_NZpTlxxl",
-    projectId: "-LbQxpuXbI9dVHD83BjD",
-    vrtProcessId: "-LfRLt61UV8bH0ZWr3kW"
+    projectId: "-Lfje33Sx6yjCf3BtW11",
+    vrtProcessId: "-LfRLt61UV8bH0ZWr3kW",
+    type: 'cypress'
 }
 
 const report = [];
@@ -50,6 +54,9 @@ promises = [];
 folder_s3= 'cypress/'
 
 var t = setInterval(rcvMsg, 2000);
+//runVrt(examplejson);
+
+createVRTFolder();
 
 function rcvMsg() {
     sqs.receiveMessage(params, function (err, data) {
@@ -60,7 +67,9 @@ function rcvMsg() {
                 console.log('msg rcv', JSON.parse(test));
                 receiptHandle = data.Messages[0].ReceiptHandle;
                 testObj = JSON.parse(test);
-                folder_s3 = `${testObj.type}/`;
+                if(testObj.type!==''){
+                    folder_s3 = `${testObj.type}/`;
+                }
                 runVrt(testObj);
                 deleteMessage();
             } else {
@@ -74,7 +83,6 @@ function rcvMsg() {
 
 function runVrt(testObj) {
     db.updateVrtProcess(testObj.projectId, testObj.vrtProcessId, 'In progress');
-    createVRTFolder();
     listFeatures(testObj);
 }
 
@@ -140,8 +148,7 @@ function buildJson(data) {
         screenshots.push({ name: imgName, v1: v1ImgPath, v2: v2ImgPath, diff: diffImgPath });
     });
 
-    fs.writeFileSync('report.json', JSON.stringify(report), 'utf8');
-    uploadFile('report.json', `${folder_s3}/${data.projectId}/vrt/${data.vrtProcessId}/report.json`, 'application/json');
+
 }
 
 
@@ -173,11 +180,11 @@ async function compareAllImages(test) {
                 async function downloadImages() {
                     await downloadImage(screenshot.v1, `${feature.name}/${scenario.name}/${name}/v1-${screenshot.name}`);
                     await downloadImage(screenshot.v2, `${feature.name}/${scenario.name}/${name}/v2-${screenshot.name}`);
-                    getDiff(img1Path, img2Path, diffPath, screenshot.diff);
+                    getDiff(img1Path, img2Path, diffPath, screenshot.diff, feature);
                 }
 
-                downloadImages();
-
+                screenshot['diffData'] = downloadImages();
+                console.log('report-----', screenshot);
                 shell.cd('..');
 
             });
@@ -185,7 +192,8 @@ async function compareAllImages(test) {
         });
         shell.cd('..');
     });
-
+    fs.writeFileSync('report.json', JSON.stringify(report), 'utf8');
+    uploadFile('report.json', `${folder_s3}/${data.projectId}/vrt/${data.vrtProcessId}/report.json`, 'application/json');
     console.log('Test finished!!!');
     updateTerminatedProcess(test);
 }
@@ -209,7 +217,7 @@ function downloadImage(key, imgName) {
     );
 }
 
-async function getDiff(img1, img2, output, s3key) {
+async function getDiff(img1, img2, output, s3key, screenshot) {
 
     const options = {
         output: {
@@ -233,9 +241,27 @@ async function getDiff(img1, img2, output, s3key) {
         fs.readFileSync(img2),
         options
     );
-    fs.writeFileSync(output, data.getBuffer());
+     fs.writeFileSync(output, data.getBuffer());
+        uploadFile(output, s3key, 'image/png');
+    // compareImages(
+    //     fs.readFileSync(img1),
+    //     fs.readFileSync(img2),
+    //     options
+    // ).then(data => {
+   
+    //     return data;
+    // }).catch( error => {
+    //     console.log('error comparing images', error)
+    // })
+        /*
+    {
+      misMatchPercentage : 100, // %
+      isSameDimensions: true, // or false
+      dimensionDifference: { width: 0, height: -1 }, // defined if dimensions are not the same
+      getImageDataUrl: function(){}
+    }
+    */
 
-    promises.push(uploadFile(output, s3key, 'image/png'));
 }
 
 var uploadFile = function (file, s3key, contentType) {

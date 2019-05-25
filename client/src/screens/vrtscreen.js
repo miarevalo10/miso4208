@@ -159,7 +159,7 @@ export default class Vrtscreen extends Component {
         let type = '';
         if(this.state.application.type ==='Android') {
             type = 'calabash';
-        } else if (this.state.application === 'web'){
+        } else if (this.state.application.type === 'web'){
             type= 'cypress'
         }
 
