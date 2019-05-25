@@ -26,7 +26,6 @@ var s3 = new AWS.S3();
 var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 const basePath = './vrt/';
 const BUCKET_NAME = 'pruebas-autom';
-const FOLDER_S3 = 'cypress/'
 const URL_S3 = 'https://s3-us-west-2.amazonaws.com/' + BUCKET_NAME + "/"
 
 /**
@@ -48,8 +47,9 @@ const examplejson = {
 const report = [];
 imgKeys = [];
 promises = [];
+folder_s3= 'cypress/'
 
-//var t = setInterval(rcvMsg, 2000);
+var t = setInterval(rcvMsg, 2000);
 
 function rcvMsg() {
     sqs.receiveMessage(params, function (err, data) {
@@ -60,6 +60,7 @@ function rcvMsg() {
                 console.log('msg rcv', JSON.parse(test));
                 receiptHandle = data.Messages[0].ReceiptHandle;
                 testObj = JSON.parse(test);
+                folder_s3 = `${testObj.type}/`;
                 runVrt(testObj);
                 deleteMessage();
             } else {
@@ -69,10 +70,10 @@ function rcvMsg() {
     });
 }
 
-runVrt(examplejson);
+//runVrt(examplejson);
 
 function runVrt(testObj) {
-    // db.updateVrtProcess(testObj.projectId, testObj.vrtProcessId, 'In progress');
+    db.updateVrtProcess(testObj.projectId, testObj.vrtProcessId, 'In progress');
     createVRTFolder();
     listFeatures(testObj);
 }
@@ -95,6 +96,7 @@ function listFeatures(data) {
         if (err) console.log(err, err.stack);
         else {
             data.Contents.forEach(file => {
+                console.log('list objectsss', file);
                 fileArr = file.Key.split('/screenshots/');
                 if (fileArr.length > 0) {
                     imgKeys.push(fileArr[1]);
@@ -108,13 +110,13 @@ function listFeatures(data) {
 }
 
 function getS3Path(projectId, versionId, processId) {
-    return `${FOLDER_S3}${projectId}/versions/${versionId}/process/${processId}/screenshots`;
+    return `${folder_s3}${projectId}/versions/${versionId}/process/${processId}/screenshots`;
 }
 
 function buildJson(data) {
     var v1path = getS3Path(data.projectId, data.versionOneId, data.processOneId);
     var v2path = getS3Path(data.projectId, data.versionTwoId, data.processTwoId);
-    var diffPath = `${FOLDER_S3}${data.projectId}/vrt/${data.vrtProcessId}/screenshots`;
+    var diffPath = `${folder_s3}${data.projectId}/vrt/${data.vrtProcessId}/screenshots`;
 
     imgKeys.forEach(img => {
         var imgArr = img.split('/');
@@ -139,7 +141,7 @@ function buildJson(data) {
     });
 
     fs.writeFileSync('report.json', JSON.stringify(report), 'utf8');
-    uploadFile('report.json', `cypress/${data.projectId}/vrt/${data.vrtProcessId}/report.json`, 'application/json');
+    uploadFile('report.json', `${folder_s3}/${data.projectId}/vrt/${data.vrtProcessId}/report.json`, 'application/json');
 }
 
 
@@ -280,7 +282,7 @@ function deleteMessage() {
 function updateTerminatedProcess(data) {
     let process = db.getVrtProcess(data.projectId, data.vrtProcessId);
     console.log('udpate terminated process');
-    process.child('report').set(URL_S3 + `cypress/${data.projectId}/vrt/${data.vrtProcessId}/report.json`)
+    process.child('report').set(URL_S3 + `${folder_s3}${data.projectId}/vrt/${data.vrtProcessId}/report.json`)
     process.update({ state: "Terminated" })
 }
 
