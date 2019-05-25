@@ -22,6 +22,7 @@ export default class ApplicationDetail extends Component {
             collapse: false,
             collapseTwo: false,
             collapseThree: false,
+            collapseFour: false,
         }
     }
 
@@ -32,7 +33,8 @@ export default class ApplicationDetail extends Component {
             this.setState(state => ({
                 collapse: !state.collapse,
                 collapseTwo: false,
-                collapseThree: false
+                collapseThree: false,
+                collapseFour: false
             }));
         }
 
@@ -45,7 +47,8 @@ export default class ApplicationDetail extends Component {
             this.setState(state => ({
                 collapseTwo: !state.collapseTwo,
                 collapse: false,
-                collapseThree: false
+                collapseThree: false,
+                collapseFour: false,
             }));
         }
     }
@@ -57,7 +60,21 @@ export default class ApplicationDetail extends Component {
             this.setState(state => ({
                 collapseThree: !state.collapseThree,
                 collapse: false,
-                collapseTwo: false
+                collapseTwo: false,
+                collapseFour: false
+            }));
+        }
+    }
+
+    toggleFour = () => {
+        if (this.state.collapseThree) {
+            this.setState(state => ({ collapseFour: !state.collapseFour }));
+        } else {
+            this.setState(state => ({
+                collapseFour: !state.collapseFour,
+                collapse: false,
+                collapseTwo: false,
+                collapseThree: false
             }));
         }
     }
@@ -114,7 +131,7 @@ export default class ApplicationDetail extends Component {
         </ListGroupItem>
     }
 
-    renderBDT = (process, key) => {
+    renderE2E = (process, key, version) => {
         const { state } = process;
 
         var stateHTML
@@ -142,13 +159,60 @@ export default class ApplicationDetail extends Component {
                 color = "danger"
             }
         }
+        var title = "E2E testing"
+        if (version) {
+            title += " on version " + version.name
+        }
         return <ListGroupItem key={key} color={color}>
-            <ListGroupItemHeading>BDT testing</ListGroupItemHeading>
+            <ListGroupItemHeading>{title}</ListGroupItemHeading>
             <ListGroupItemText>
                 {report}
                 -
-                {stateHTML}
-            </ListGroupItemText>
+                {stateHTML}</ListGroupItemText>
+
+        </ListGroupItem>
+
+    }
+
+    renderBDT = (process, key,version) => {
+        const { state } = process;
+
+        var stateHTML
+        var color
+        if (state) {
+            stateHTML = <span>State: {process.state} </span>
+            if (state === "Terminated" || state === "Finished") {
+                color = "success";
+                var report = <Link to={{
+                    pathname: '/process-details',
+                    state: {
+                        appKey: this.state.appKey,
+                        process: process,
+                        processKey: key
+                    }
+                }}>
+                    See report
+                </Link>
+
+            } else if (state === "Running" || state === "In progress") {
+                color = "info"
+            } else if (state === "Sent") {
+                color = "warning"
+            } else if (state === "Failed") {
+                color = "danger"
+            }
+        }
+        var title = "BDT testing"
+        if (version) {
+            title += " on version " + version.name
+        }
+        return <ListGroupItem key={key} color={color}>
+            <ListGroupItemHeading>{title}</ListGroupItemHeading>
+            <ListGroupItemText>
+                {report}
+                -
+                {stateHTML}</ListGroupItemText>
+
         </ListGroupItem>
 
     }
@@ -210,7 +274,9 @@ export default class ApplicationDetail extends Component {
                     if (value.type && (value.type.toLowerCase() === 'random' || value.type.toLowerCase() === 'monkey')) {
                         return this.renderMonkey(value, key, version)
                     } else if (value.type && (value.type.toLowerCase() === 'bdt' || value.type.toLowerCase() === 'calabash')) {
-                        return this.renderBDT(value, key)
+                        return this.renderBDT(value, key, version)
+                    } else if (value.type && value.type.toLowerCase() === 'cypress'){
+                        return this.renderE2E(value,key, version)
                     } else {
                         var stateHTML
                         var color
@@ -391,6 +457,8 @@ export default class ApplicationDetail extends Component {
                         <Button outline size="lg" color="primary" onClick={this.toggleTwo} style={{ marginBottom: '1rem' }}>Add new version</Button>
 
                         <Button outline size="lg" color="primary" onClick={this.toggleThree} style={{ marginBottom: '1rem' }}>Run vrt</Button>
+
+                        <Button outline size="lg" color="primary" onClick={this.toggleFour} style={{ marginBottom: '1rem' }}>Run mutation</Button>
                     </Container>
 
                 </Row>
@@ -420,6 +488,12 @@ export default class ApplicationDetail extends Component {
                 </Collapse>
 
                 <Collapse isOpen={this.state.collapseThree}>
+                    <Card>
+                        <Vrtscreen application={app} projectId={this.state.appKey} />
+                    </Card>
+                </Collapse>
+
+                <Collapse isOpen={this.state.collapseFour}>
                     <Card>
                         <Vrtscreen application={app} projectId={this.state.appKey} />
                     </Card>
