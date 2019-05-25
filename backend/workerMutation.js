@@ -95,7 +95,7 @@ const downloadFeatures = (test) => {
       shell.cd(basePath)
       resignApk(test.apkName);
       generateMutants(test)
-      //runTestingSet(test);
+      runTestingSet(test);
       //rimraf.sync(basePath);
     }
   })
@@ -114,8 +114,8 @@ const resignApk = (apkName) => {
 }
 
 function resetProject() {
-  shell.exec('rm -r ' + MUTATION_PATH)
-  shell.exec('mkdir ' + MUTATION_PATH)  
+  shell.rm('-rf',MUTATION_PATH)
+  shell.mkdir(MUTATION_PATH)  
 }
 
 function generateMutants(data) {
@@ -123,30 +123,37 @@ function generateMutants(data) {
 }
 
 const runTestingSet = (test) => {
-  console.log('running test suite', shell.exec(`calabash-android run ${test.apkName} --format html --out report.html`).stdout);
-  uploadFileToS3('report.html', s3Path(test), 'text/html');
-  uploadImages(test);
-  updateProcess(test);
+  for(var i = 1;i<=test.numMutants;i++){
+    var mutantKey = test.appPackage+'-mutant'+i;
+    var completePath = '.\\mutation\\mutants\\'+mutantKey+'\\'+ test.apkName;
+    console.log(`calabash-android run ${completePath} --format html --out report-${mutantKey}.html`);
+    resignApk(completePath);
+    console.log('running test suite mutant ' + i , shell.exec(`calabash-android run ${completePath} --format html --out report-${mutantKey}.html`).stdout);
+    uploadFileToS3('report-'+mutantKey+'.html', s3Path(test,mutantKey), 'text/html');
+    uploadImages(test,mutantKey);
+    updateProcess(test,mutantKey);
+  }
+  
   deleteMessage();
 }
 
 function uploadImages(test) {
   fs.readdirSync('./').forEach(file => {
     if (file.match(/[\/.](gif|jpg|jpeg|tiff|png)$/i)) {
-      uploadFileToS3(file, s3Path(test), 'image/png');
+      uploadFileToS3(file, s3Path(test,mutantKey), 'image/png');
     }
   });
 }
 
-function updateProcess(data) {
+function updateProcess(data, mutantKey) {
   let process = db.getProcess(data.projectId, data.processId)
-  process.child('report').set(URL_S3 + s3Path(data) + 'report.html')
+  process.child('report').set(URL_S3 + s3Path(data,mutantKey) + 'report.html')
   process.update({ state: "Terminated" })
   console.log(`Process ${data.processId} terminated`);
 }
 
-function s3Path(data) {
-  return FOLDER_S3 + data.projectId + "/process/" + data.processId + "/"
+function s3Path(data,mutantKey) {
+  return FOLDER_S3 + data.projectId + "/process/" + data.processId + "/" + mutantKey
 }
 
 function uploadFileToS3(filePath, s3Path, contentType) {
