@@ -51,7 +51,7 @@ const examplejson = {
 const report = [];
 imgKeys = [];
 promises = [];
-folder_s3= 'cypress/'
+folder_s3 = 'cypress/'
 
 var t = setInterval(rcvMsg, 2000);
 //runVrt(examplejson);
@@ -67,7 +67,7 @@ function rcvMsg() {
                 console.log('msg rcv', JSON.parse(test));
                 receiptHandle = data.Messages[0].ReceiptHandle;
                 testObj = JSON.parse(test);
-                if(testObj.type!==''){
+                if (testObj.type !== '') {
                     folder_s3 = `${testObj.type}/`;
                 }
                 runVrt(testObj);
@@ -111,8 +111,11 @@ function listFeatures(data) {
                 }
             });
             buildJson(testData);
-            compareAllImages(testData);
-
+            compareAllImages(testData).then(results => {
+                uploadFile('report.json', `${folder_s3}${testData.projectId}/vrt/${testData.vrtProcessId}/report.json`, 'application/json');
+                console.log('Test finished!!!');
+                updateTerminatedProcess(testData);
+            });
         }
     });
 }
@@ -145,16 +148,16 @@ function buildJson(data) {
         }
 
         var screenshots = _.find(scenarios, { name: scenarioName }).screenshots;
-        screenshots.push({ name: imgName, v1: v1ImgPath, v2: v2ImgPath, diff: diffImgPath });
+        screenshots.push({ name: imgName, v1: v1ImgPath, v2: v2ImgPath, diff: diffImgPath, diffData: '' });
     });
-
-
 }
 
 
 async function compareAllImages(test) {
 
-    await report.forEach(feature => {
+    let cont = report.length;
+    let promises = [];
+    report.forEach(feature => {
 
         if (!fs.existsSync(feature.name)) {
             fs.mkdirSync(feature.name);
@@ -176,15 +179,20 @@ async function compareAllImages(test) {
                 var img1Path = `${feature.name}/${scenario.name}/${name}/v1-${screenshot.name}`;
                 var img2Path = `${feature.name}/${scenario.name}/${name}/v2-${screenshot.name}`;
                 var diffPath = `${feature.name}/${scenario.name}/${name}/diff-${screenshot.name}`;
-
+                console.log('############')
                 async function downloadImages() {
                     await downloadImage(screenshot.v1, `${feature.name}/${scenario.name}/${name}/v1-${screenshot.name}`);
                     await downloadImage(screenshot.v2, `${feature.name}/${scenario.name}/${name}/v2-${screenshot.name}`);
-                    getDiff(img1Path, img2Path, diffPath, screenshot.diff, feature);
+                    getDiff(img1Path, img2Path, diffPath, screenshot.diff, feature).then(data => {
+                        console.log('dataaa', data)
+                        addDiffData(feature.name, scenario.name, screenshot.name, data);
+                        console.log('report-----', screenshot);
+                    });
                 }
-
-                screenshot['diffData'] = downloadImages();
-                console.log('report-----', screenshot);
+                promises.push(downloadImages().then(diff => {
+                    fs.writeFileSync('report.json', JSON.stringify(report), 'utf8');
+                    cont--;
+                }));
                 shell.cd('..');
 
             });
@@ -192,12 +200,15 @@ async function compareAllImages(test) {
         });
         shell.cd('..');
     });
-    fs.writeFileSync('report.json', JSON.stringify(report), 'utf8');
-    uploadFile('report.json', `${folder_s3}/${data.projectId}/vrt/${data.vrtProcessId}/report.json`, 'application/json');
-    console.log('Test finished!!!');
-    updateTerminatedProcess(test);
+    return Promise.all(promises);
+
+
 }
 
+function addDiffData(featName, sceName, ssName, diff) {
+    console.log('ADD DIFF', featName, sceName, ssName)
+    _.find(_.find(_.find(report, { 'name': featName }).scenarios, { 'name': sceName }).screenshots, { 'name': ssName }).diffData = diff;
+}
 function downloadImage(key, imgName) {
 
     var params = {
@@ -241,26 +252,17 @@ async function getDiff(img1, img2, output, s3key, screenshot) {
         fs.readFileSync(img2),
         options
     );
-     fs.writeFileSync(output, data.getBuffer());
-        uploadFile(output, s3key, 'image/png');
-    // compareImages(
-    //     fs.readFileSync(img1),
-    //     fs.readFileSync(img2),
-    //     options
-    // ).then(data => {
-   
-    //     return data;
-    // }).catch( error => {
-    //     console.log('error comparing images', error)
-    // })
-        /*
-    {
-      misMatchPercentage : 100, // %
-      isSameDimensions: true, // or false
-      dimensionDifference: { width: 0, height: -1 }, // defined if dimensions are not the same
-      getImageDataUrl: function(){}
-    }
-    */
+    fs.writeFileSync(output, data.getBuffer());
+    uploadFile(output, s3key, 'image/png');
+    return data;
+/*
+{
+  misMatchPercentage : 100, // %
+  isSameDimensions: true, // or false
+  dimensionDifference: { width: 0, height: -1 }, // defined if dimensions are not the same
+  getImageDataUrl: function(){}
+}
+*/
 
 }
 
@@ -280,7 +282,7 @@ var uploadFile = function (file, s3key, contentType) {
                 if (err) {
                     reject(err);
                 } else {
-                    //console.log("Successfully uploaded data ", s3key);
+                    console.log("Successfully uploaded data ", s3key);
                     resolve(data);
                 }
 

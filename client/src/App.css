@@ -52,7 +52,15 @@
   font-weight: 500;
 }
 .featureTitle {
+  float: left;
 
+  font-size: 1.3em;
+  font-weight: 500;
+}
+
+
+.featureTitleRight{
+float: right;
   font-size: 1.3em;
   font-weight: 500;
 }
